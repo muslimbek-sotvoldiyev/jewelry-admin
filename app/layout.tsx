@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
-import { Providers } from "@/lib/providers"
+import StoreProvider from "@/lib/providers"
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="uz">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <Providers>{children}</Providers>
+          <StoreProvider>{children}</StoreProvider>
         </Suspense>
         <Analytics />
       </body>

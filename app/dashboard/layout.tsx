@@ -19,6 +19,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
+import useAuth from "@/hooks/auth"
 // import { useGetNotificationsQuery } from "@/lib/api/jewelryApi"
 
 const navigation = [
@@ -38,7 +39,8 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-
+  useAuth();
+  
   // const { data: notifications = [] } = useGetNotificationsQuery()
   // const unreadCount = notifications.filter((n) => !n.isRead).length
   const unreadCount = 3 // Mock unread count

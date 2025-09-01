@@ -91,7 +91,7 @@ const getStatusBadge = (status: string) => {
       return (
         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
           <CheckCircle className="h-3 w-3 mr-1" />
-          Tasdiqlangan
+          Yakunlangan
         </Badge>
       )
     case "pending_sender":
@@ -112,7 +112,7 @@ const getStatusBadge = (status: string) => {
       return (
         <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
           <ArrowLeftRight className="h-3 w-3 mr-1" />
-          Qaytarildi
+          Qaytarilgan
         </Badge>
       )
     case "cancelled":
@@ -307,7 +307,7 @@ export default function TransfersPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasdiqlangan</CardTitle>
+            <CardTitle className="text-sm font-medium">Yakunlangan</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -317,8 +317,8 @@ export default function TransfersPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kutilmoqda</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <CardTitle className="text-sm font-medium">Jarayonda</CardTitle>
+            <Clock className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{transfers.filter((t) => t.status.includes("pending")).length}</div>
@@ -327,11 +327,13 @@ export default function TransfersPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Qaytarilgan</CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-purple-600" />
+            <CardTitle className="text-sm font-medium">Bekor qilingan</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{transfers.filter((t) => t.status === "returned").length}</div>
+            <div className="text-2xl font-bold">
+              {transfers.filter((t) => t.status === "cancelled" || t.status === "returned").length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -359,7 +361,7 @@ export default function TransfersPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Barchasi</SelectItem>
-                <SelectItem value="confirmed">Tasdiqlangan</SelectItem>
+                <SelectItem value="confirmed">Yakunlangan</SelectItem>
                 <SelectItem value="pending_sender">Yuboruvchi kutilmoqda</SelectItem>
                 <SelectItem value="pending_receiver">Qabul qiluvchi kutilmoqda</SelectItem>
                 <SelectItem value="returned">Qaytarilgan</SelectItem>
