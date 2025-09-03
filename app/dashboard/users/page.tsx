@@ -27,67 +27,36 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye, EyeOff } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import {
+  useGetUsersQuery,
+  useAddUsersMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  UsersApi,
+} from "@/lib/service/usersApi"
+import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
+
+import { useDispatch } from "react-redux" // Redux dispatch'ni import qiling
+
 
 interface User {
-  id: string
+  id: number
   username: string
   email: string
-  firstName: string
-  lastName?: string
-  role: "admin" | "bank_operator" | "atolye_operator"
+  first_name: string
+  last_name?: string
+  is_active: boolean
+  is_staff: boolean
   organization: number
-  organizationName: string
-  isActive: boolean
-  isStaff: boolean
-  createdAt: string
-  lastLogin?: string
 }
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    username: "admin_user",
-    email: "admin@example.com",
-    firstName: "Admin",
-    lastName: "Adminov",
-    role: "admin",
-    organization: 1,
-    organizationName: "Asosiy Bank",
-    isActive: true,
-    isStaff: true,
-    createdAt: "2024-01-15",
-    lastLogin: "2024-01-20 14:30",
-  },
-  {
-    id: "2",
-    username: "bank_op1",
-    email: "bank@example.com",
-    firstName: "Aziz",
-    lastName: "Karimov",
-    role: "bank_operator",
-    organization: 1,
-    organizationName: "Asosiy Bank",
-    isActive: true,
-    isStaff: true,
-    createdAt: "2024-01-16",
-    lastLogin: "2024-01-20 09:15",
-  },
-  {
-    id: "3",
-    username: "atolye_op1",
-    email: "atolye@example.com",
-    firstName: "Dilshod",
-    role: "atolye_operator",
-    organization: 2,
-    organizationName: "Zargarlik Atolyesi #1",
-    isActive: true,
-    isStaff: false,
-    createdAt: "2024-01-17",
-    lastLogin: "2024-01-19 16:45",
-  },
-]
+interface Organization {
+  id: number
+  name?: string
+  type?: string
+}
 
 const roleLabels = {
   admin: "Administrator",
@@ -102,7 +71,14 @@ const roleColors = {
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers)
+    const dispatch = useDispatch() // Redux dispatch'ni olish
+  
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useGetUsersQuery(undefined)
+  const { data: organizations = [], isLoading: orgsLoading } = useGetOrganizationsQuery({})
+  const [addUser] = useAddUsersMutation()
+  const [updateUser] = useUpdateUserMutation()
+  const [deleteUser] = useDeleteUserMutation()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -110,11 +86,6 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [organizations, setOrganizations] = useState([
-    { id: 1, name: "Asosiy Bank" },
-    { id: 2, name: "Zargarlik Atolyesi #1" },
-    { id: 3, name: "Zargarlik Atolyesi #2" },
-  ])
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -128,13 +99,21 @@ export default function UsersPage() {
     isStaff: false,
   })
 
+  const getOrganizationInfo = (orgId: number) => {
+    const org = organizations.find((o: Organization) => o.id === orgId)
+    if (org && org.name && org.type) {
+      return `${org.name} (${org.type})`
+    }
+    return `Tashkilot #${orgId}`
+  }
+
   const filteredUsers = users.filter(
-    (user) =>
+    (user: User) =>
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.lastName && user.lastName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      user.organizationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
+      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getOrganizationInfo(user.organization).toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const resetForm = () => {
@@ -154,14 +133,7 @@ export default function UsersPage() {
 
   const handleCreateUser = async () => {
     // Validate required fields
-    if (
-      !formData.username ||
-      !formData.email ||
-      !formData.password ||
-      !formData.firstName ||
-      !formData.role ||
-      !formData.organization
-    ) {
+    if (!formData.username || !formData.email || !formData.password || !formData.firstName || !formData.organization) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -181,7 +153,7 @@ export default function UsersPage() {
     }
 
     // Check if username already exists
-    if (users.some((user) => user.username === formData.username)) {
+    if (users.some((user: User) => user.username === formData.username)) {
       toast({
         title: "Xatolik",
         description: "Bu foydalanuvchi nomi allaqachon mavjud",
@@ -202,33 +174,7 @@ export default function UsersPage() {
     }
 
     try {
-      // TODO: Uncomment when API is ready
-      // const response = await fetch('/api/users/', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(apiData)
-      // })
-      // if (!response.ok) throw new Error('Failed to create user')
-      // const newUser = await response.json()
-
-      console.log("API Data being sent:", apiData)
-
-      // Mock implementation
-      const newUser: User = {
-        id: Date.now().toString(),
-        username: formData.username,
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName || undefined,
-        role: formData.role as User["role"],
-        organization: Number.parseInt(formData.organization),
-        organizationName: organizations.find((org) => org.id === Number.parseInt(formData.organization))?.name || "",
-        isActive: formData.isActive,
-        isStaff: formData.isStaff,
-        createdAt: new Date().toISOString().split("T")[0],
-      }
-
-      setUsers([...users, newUser])
+      await addUser(apiData).unwrap()
       resetForm()
       setIsCreateDialogOpen(false)
 
@@ -236,6 +182,7 @@ export default function UsersPage() {
         title: "Muvaffaqiyat",
         description: "Yangi foydalanuvchi yaratildi",
       })
+      dispatch(UsersApi.util.resetApiState());
     } catch (error) {
       toast({
         title: "Xatolik",
@@ -252,21 +199,23 @@ export default function UsersPage() {
       email: user.email,
       password: "",
       confirmPassword: "",
-      firstName: user.firstName,
-      lastName: user.lastName || "",
-      role: user.role,
+      firstName: user.first_name,
+      lastName: user.last_name || "",
+      role: "", // Role is not in the API response, so we leave it empty
       organization: user.organization.toString(),
-      isActive: user.isActive,
-      isStaff: user.isStaff,
+      isActive: user.is_active,
+      isStaff: user.is_staff,
     })
     setIsEditDialogOpen(true)
+      dispatch(UsersApi.util.resetApiState());
+
   }
 
   const handleUpdateUser = async () => {
     if (!selectedUser) return
 
     // Validate required fields
-    if (!formData.username || !formData.email || !formData.firstName || !formData.role || !formData.organization) {
+    if (!formData.username || !formData.email || !formData.firstName || !formData.organization) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -285,36 +234,23 @@ export default function UsersPage() {
       return
     }
 
+    const apiData: any = {
+      username: formData.username,
+      email: formData.email,
+      first_name: formData.firstName,
+      last_name: formData.lastName || "",
+      is_active: formData.isActive,
+      is_staff: formData.isStaff,
+      organization: Number.parseInt(formData.organization),
+    }
+
+    // Only include password if it's provided
+    if (formData.password) {
+      apiData.password = formData.password
+    }
+
     try {
-      // TODO: Uncomment when API is ready
-      // const response = await fetch(`/api/users/${selectedUser.id}/`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(apiData)
-      // })
-      // if (!response.ok) throw new Error('Failed to update user')
-
-      // Mock implementation
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id
-            ? {
-                ...user,
-                username: formData.username,
-                email: formData.email,
-                firstName: formData.firstName,
-                lastName: formData.lastName || undefined,
-                role: formData.role as User["role"],
-                organization: Number.parseInt(formData.organization),
-                organizationName:
-                  organizations.find((org) => org.id === Number.parseInt(formData.organization))?.name || "",
-                isActive: formData.isActive,
-                isStaff: formData.isStaff,
-              }
-            : user,
-        ),
-      )
-
+      await updateUser({ id: selectedUser.id, ...apiData }).unwrap()
       resetForm()
       setIsEditDialogOpen(false)
       setSelectedUser(null)
@@ -323,6 +259,7 @@ export default function UsersPage() {
         title: "Muvaffaqiyat",
         description: "Foydalanuvchi ma'lumotlari yangilandi",
       })
+      dispatch(UsersApi.util.resetApiState());
     } catch (error) {
       toast({
         title: "Xatolik",
@@ -332,23 +269,17 @@ export default function UsersPage() {
     }
   }
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (userId: number) => {
     try {
-      // TODO: Uncomment when API is ready
-      // const response = await fetch(`/api/users/${userId}/`, {
-      //   method: 'DELETE'
-      // })
-      // if (!response.ok) throw new Error('Failed to delete user')
-
-      // Mock implementation
-      setUsers(users.filter((user) => user.id !== userId))
+      await deleteUser(userId).unwrap()
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
-
+      dispatch(UsersApi.util.resetApiState());
       toast({
         title: "Muvaffaqiyat",
         description: "Foydalanuvchi o'chirildi",
       })
+      dispatch(UsersApi.util.resetApiState());
     } catch (error) {
       toast({
         title: "Xatolik",
@@ -363,24 +294,21 @@ export default function UsersPage() {
     setIsDeleteDialogOpen(true)
   }
 
-  const toggleUserStatus = async (userId: string) => {
-    try {
-      // TODO: Uncomment when API is ready
-      // const user = users.find(u => u.id === userId)
-      // const response = await fetch(`/api/users/${userId}/`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ is_active: !user?.isActive })
-      // })
-      // if (!response.ok) throw new Error('Failed to update user status')
+  const toggleUserStatus = async (userId: number) => {
+    const user = users.find((u: User) => u.id === userId)
+    if (!user) return
 
-      // Mock implementation
-      setUsers(users.map((user) => (user.id === userId ? { ...user, isActive: !user.isActive } : user)))
+    try {
+      await updateUser({
+        id: userId,
+        is_active: !user.is_active,
+      }).unwrap()
 
       toast({
         title: "Muvaffaqiyat",
         description: "Foydalanuvchi holati o'zgartirildi",
       })
+      dispatch(UsersApi.util.resetApiState());
     } catch (error) {
       toast({
         title: "Xatolik",
@@ -388,6 +316,27 @@ export default function UsersPage() {
         variant: "destructive",
       })
     }
+  }
+
+  if (usersLoading || orgsLoading) {
+    return (
+      <div className="px-6 space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (usersError) {
+    return (
+      <div className="px-6 space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <p className="text-red-600">Foydalanuvchilarni yuklashda xatolik yuz berdi</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -500,20 +449,6 @@ export default function UsersPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="role">Rol *</Label>
-                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Rolni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Administrator</SelectItem>
-                    <SelectItem value="bank_operator">Bank Operatori</SelectItem>
-                    <SelectItem value="atolye_operator">Atolye Operatori</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
                 <Label htmlFor="organization">Tashkilot *</Label>
                 <Select
                   value={formData.organization}
@@ -523,9 +458,9 @@ export default function UsersPage() {
                     <SelectValue placeholder="Tashkilotni tanlang" />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizations.map((org) => (
+                    {organizations.map((org: Organization) => (
                       <SelectItem key={org.id} value={org.id.toString()}>
-                        {org.name}
+                        {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -598,28 +533,26 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredUsers.map((user) => (
+            {filteredUsers.map((user: User) => (
               <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-red-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    {user.firstName.charAt(0)}
+                    {user.first_name.charAt(0)}
                   </div>
 
                   <div>
                     <div className="flex items-center space-x-2">
                       <h3 className="font-semibold">
-                        {user.firstName} {user.lastName}
+                        {user.first_name} {user.last_name}
                       </h3>
-                      <Badge className={roleColors[user.role]}>{roleLabels[user.role]}</Badge>
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Faol" : "Nofaol"}
+                      <Badge variant={user.is_active ? "default" : "secondary"}>
+                        {user.is_active ? "Faol" : "Nofaol"}
                       </Badge>
-                      {user.isStaff && <Badge variant="outline">Xodim</Badge>}
+                      {user.is_staff && <Badge variant="outline">Xodim</Badge>}
                     </div>
                     <p className="text-sm text-muted-foreground">@{user.username}</p>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
-                    <p className="text-sm text-muted-foreground">{user.organizationName}</p>
-                    {user.lastLogin && <p className="text-xs text-muted-foreground">Oxirgi kirish: {user.lastLogin}</p>}
+                    <p className="text-sm text-muted-foreground">{getOrganizationInfo(user.organization)}</p>
                   </div>
                 </div>
 
@@ -635,7 +568,7 @@ export default function UsersPage() {
                       Tahrirlash
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
-                      {user.isActive ? "Nofaol qilish" : "Faollashtirish"}
+                      {user.is_active ? "Nofaol qilish" : "Faollashtirish"}
                     </DropdownMenuItem>
                     <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(user)}>
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -748,20 +681,6 @@ export default function UsersPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="edit-role">Rol *</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Rolni tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="bank_operator">Bank Operatori</SelectItem>
-                  <SelectItem value="atolye_operator">Atolye Operatori</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
               <Label htmlFor="edit-organization">Tashkilot *</Label>
               <Select
                 value={formData.organization}
@@ -771,9 +690,9 @@ export default function UsersPage() {
                   <SelectValue placeholder="Tashkilotni tanlang" />
                 </SelectTrigger>
                 <SelectContent>
-                  {organizations.map((org) => (
+                  {organizations.map((org: Organization) => (
                     <SelectItem key={org.id} value={org.id.toString()}>
-                      {org.name}
+                      {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -832,7 +751,7 @@ export default function UsersPage() {
             <AlertDialogDescription>
               Haqiqatan ham{" "}
               <strong>
-                {selectedUser?.firstName} {selectedUser?.lastName}
+                {selectedUser?.first_name} {selectedUser?.last_name}
               </strong>{" "}
               foydalanuvchisini o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi.
             </AlertDialogDescription>

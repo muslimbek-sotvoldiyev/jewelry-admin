@@ -15,61 +15,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Search, Eye, Edit, Clock, Factory, AlertTriangle } from "lucide-react"
-
-// Mock workshop data
-const workshops = [
-  {
-    id: "1",
-    name: "Atolye-1",
-    owner: "Ahmad Karimov",
-    status: "active",
-    currentMaterial: "250gr Oltin",
-    workTime: "2 soat 30 daqiqa",
-    process: "Tozalash",
-    email: "atolye1@jewelry.com",
-    phone: "+998901234567",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Atolye-2",
-    owner: "Dilshod Rahimov",
-    status: "busy",
-    currentMaterial: "180gr Kumush",
-    workTime: "4 soat 15 daqiqa",
-    process: "Proba o'zgartirish",
-    email: "atolye2@jewelry.com",
-    phone: "+998901234568",
-    createdAt: "2024-01-10",
-  },
-  {
-    id: "3",
-    name: "Atolye-3",
-    owner: "Sardor Toshev",
-    status: "stopped",
-    currentMaterial: "-",
-    workTime: "-",
-    process: "-",
-    email: "atolye3@jewelry.com",
-    phone: "+998901234569",
-    createdAt: "2024-01-20",
-  },
-  {
-    id: "4",
-    name: "Atolye-4",
-    owner: "Bobur Aliev",
-    status: "active",
-    currentMaterial: "45 dona Olmos",
-    workTime: "1 soat 45 daqiqa",
-    process: "Buyum yaratish",
-    email: "atolye4@jewelry.com",
-    phone: "+998901234570",
-    createdAt: "2024-01-12",
-  },
-]
+import { Plus, Search, Eye, Edit, Clock, Factory, AlertTriangle, Loader2, Trash2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
+import {
+  useGetOrganizationsQuery,
+  useAddOrganizationMutation,
+  useDeleteOrganizationMutation,
+  useUpdateOrganizationMutation,
+} from "@/lib/service/atolyeApi"
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -85,27 +52,132 @@ const getStatusBadge = (status: string) => {
 }
 
 export default function WorkshopsPage() {
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedWorkshop, setSelectedWorkshop] = useState<any>(null)
   const [newWorkshop, setNewWorkshop] = useState({
     name: "",
-    owner: "",
-    email: "",
-    phone: "",
-    password: "",
+    type: "",
+  })
+  const [editWorkshop, setEditWorkshop] = useState({
+    name: "",
+    type: "",
   })
 
-  const filteredWorkshops = workshops.filter(
-    (workshop) =>
-      workshop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      workshop.owner.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const { data: workshops = [], isLoading, error } = useGetOrganizationsQuery({})
+  const [addOrganization, { isLoading: isCreating }] = useAddOrganizationMutation()
+  const [deleteOrganization, { isLoading: isDeleting }] = useDeleteOrganizationMutation()
+  const [updateOrganization, { isLoading: isUpdating }] = useUpdateOrganizationMutation()
 
-  const handleCreateWorkshop = () => {
-    // TODO: Implement workshop creation logic
-    console.log("Creating workshop:", newWorkshop)
-    setIsCreateDialogOpen(false)
-    setNewWorkshop({ name: "", owner: "", email: "", phone: "", password: "" })
+  const filteredWorkshops = workshops.filter((workshop: { name: string; owner: string; status: string }) => {
+    const matchesSearch =
+      workshop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      workshop.owner.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesStatus = statusFilter === "all" || workshop.status === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
+
+  const handleCreateWorkshop = async () => {
+    if (!newWorkshop.name || !newWorkshop.type) {
+      toast({
+        title: "Xatolik",
+        description: "Barcha majburiy maydonlarni to'ldiring",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      await addOrganization(newWorkshop).unwrap()
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Yangi atolye yaratildi",
+      })
+      setIsCreateDialogOpen(false)
+      setNewWorkshop({ name: "", type: "" })
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Atolye yaratishda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditWorkshop = async () => {
+    if (!editWorkshop.name || !editWorkshop.type) {
+      toast({
+        title: "Xatolik",
+        description: "Barcha majburiy maydonlarni to'ldiring",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      await updateOrganization({
+        id: selectedWorkshop.id,
+        ...editWorkshop,
+      }).unwrap()
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Atolye ma'lumotlari yangilandi",
+      })
+      setIsEditDialogOpen(false)
+      setSelectedWorkshop(null)
+      setEditWorkshop({ name: "", type: "" })
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Atolye ma'lumotlarini yangilashda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteWorkshop = async (id: string) => {
+    try {
+      await deleteOrganization(id).unwrap()
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Atolye o'chirildi",
+      })
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Atolye o'chirishda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const openEditDialog = (workshop: any) => {
+    setSelectedWorkshop(workshop)
+    setEditWorkshop({
+      name: workshop.name,
+      type: workshop.type || "",
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-destructive">Xatolik</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Ma'lumotlarni yuklashda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -126,13 +198,11 @@ export default function WorkshopsPage() {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Yangi atolye yaratish</DialogTitle>
-              <DialogDescription>
-                Yangi atolye uchun ma'lumotlarni kiriting. Atolye egasi login va parol oladi.
-              </DialogDescription>
+              <DialogDescription>Yangi atolye uchun asosiy ma'lumotlarni kiriting.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Atolye nomi</Label>
+                <Label htmlFor="name">Atolye nomi *</Label>
                 <Input
                   id="name"
                   placeholder="Atolye-5"
@@ -141,52 +211,99 @@ export default function WorkshopsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="owner">Egasi</Label>
-                <Input
-                  id="owner"
-                  placeholder="Ism Familiya"
-                  value={newWorkshop.owner}
-                  onChange={(e) => setNewWorkshop({ ...newWorkshop, owner: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="atolye5@jewelry.com"
-                  value={newWorkshop.email}
-                  onChange={(e) => setNewWorkshop({ ...newWorkshop, email: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Telefon</Label>
-                <Input
-                  id="phone"
-                  placeholder="+998901234567"
-                  value={newWorkshop.phone}
-                  onChange={(e) => setNewWorkshop({ ...newWorkshop, phone: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Parol</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={newWorkshop.password}
-                  onChange={(e) => setNewWorkshop({ ...newWorkshop, password: e.target.value })}
-                />
+                <Label htmlFor="type">Atolye turi *</Label>
+                <Select
+                  value={newWorkshop.type}
+                  onValueChange={(value) => setNewWorkshop({ ...newWorkshop, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Atolye turini tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gold_processing">Oltin qayta ishlash</SelectItem>
+                    <SelectItem value="silver_processing">Kumush qayta ishlash</SelectItem>
+                    <SelectItem value="jewelry_making">Zargarlik buyumlari yaratish</SelectItem>
+                    <SelectItem value="cleaning">Tozalash</SelectItem>
+                    <SelectItem value="repair">Ta'mirlash</SelectItem>
+                    <SelectItem value="bank">Bank</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreateWorkshop}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false)
+                  setNewWorkshop({ name: "", type: "" })
+                }}
+              >
+                Bekor qilish
+              </Button>
+              <Button type="submit" onClick={handleCreateWorkshop} disabled={isCreating}>
+                {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Yaratish
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Atolyeni tahrirlash</DialogTitle>
+            <DialogDescription>Atolye ma'lumotlarini yangilang.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Atolye nomi *</Label>
+              <Input
+                id="edit-name"
+                placeholder="Atolye-5"
+                value={editWorkshop.name}
+                onChange={(e) => setEditWorkshop({ ...editWorkshop, name: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-type">Atolye turi *</Label>
+              <Select
+                value={editWorkshop.type}
+                onValueChange={(value) => setEditWorkshop({ ...editWorkshop, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Atolye turini tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gold_processing">Oltin qayta ishlash</SelectItem>
+                  <SelectItem value="silver_processing">Kumush qayta ishlash</SelectItem>
+                  <SelectItem value="jewelry_making">Zargarlik buyumlari yaratish</SelectItem>
+                  <SelectItem value="cleaning">Tozalash</SelectItem>
+                  <SelectItem value="repair">Ta'mirlash</SelectItem>
+                  <SelectItem value="bank">Bank</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false)
+                setSelectedWorkshop(null)
+                setEditWorkshop({ name: "", type: "" })
+              }}
+            >
+              Bekor qilish
+            </Button>
+            <Button type="submit" onClick={handleEditWorkshop} disabled={isUpdating}>
+              {isUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Yangilash
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -196,7 +313,9 @@ export default function WorkshopsPage() {
             <Factory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workshops.length}</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : workshops.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -206,7 +325,13 @@ export default function WorkshopsPage() {
             <div className="h-2 w-2 bg-green-500 rounded-full" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workshops.filter((w) => w.status === "active").length}</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                workshops.filter((w: { status: string }) => w.status === "active").length
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -216,7 +341,13 @@ export default function WorkshopsPage() {
             <div className="h-2 w-2 bg-yellow-500 rounded-full" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workshops.filter((w) => w.status === "busy").length}</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                workshops.filter((w: { status: string }) => w.status === "busy").length
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -226,7 +357,13 @@ export default function WorkshopsPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workshops.filter((w) => w.status === "stopped").length}</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                workshops.filter((w: { status: string }) => w.status === "stopped").length
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -248,7 +385,7 @@ export default function WorkshopsPage() {
                 className="pl-10"
               />
             </div>
-            <Select defaultValue="all">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Holat bo'yicha" />
               </SelectTrigger>
@@ -261,49 +398,86 @@ export default function WorkshopsPage() {
             </Select>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Atolye</TableHead>
-                <TableHead>Egasi</TableHead>
-                <TableHead>Holat</TableHead>
-                <TableHead>Hozirgi material</TableHead>
-                <TableHead>Ish vaqti</TableHead>
-                <TableHead>Jarayon</TableHead>
-                <TableHead>Amallar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredWorkshops.map((workshop) => (
-                <TableRow key={workshop.id}>
-                  <TableCell className="font-medium">{workshop.name}</TableCell>
-                  <TableCell>{workshop.owner}</TableCell>
-                  <TableCell>{getStatusBadge(workshop.status)}</TableCell>
-                  <TableCell>{workshop.currentMaterial}</TableCell>
-                  <TableCell>
-                    {workshop.workTime !== "-" && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {workshop.workTime}
-                      </div>
-                    )}
-                    {workshop.workTime === "-" && "-"}
-                  </TableCell>
-                  <TableCell>{workshop.process}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Atolye</TableHead>
+                  <TableHead>Egasi</TableHead>
+                  <TableHead>Holat</TableHead>
+                  <TableHead>Hozirgi material</TableHead>
+                  <TableHead>Ish vaqti</TableHead>
+                  <TableHead>Jarayon</TableHead>
+                  <TableHead>Amallar</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredWorkshops.map((workshop) => (
+                  <TableRow key={workshop.id}>
+                    <TableCell className="font-medium">{workshop.name}</TableCell>
+                    <TableCell>{workshop.owner}</TableCell>
+                    <TableCell>{getStatusBadge(workshop.status)}</TableCell>
+                    <TableCell>{workshop.currentMaterial || "-"}</TableCell>
+                    <TableCell>
+                      {workshop.workTime && workshop.workTime !== "-" ? (
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {workshop.workTime}
+                        </div>
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
+                    <TableCell>{workshop.process || "-"}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/workshops/${workshop.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(workshop)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Atolyeni o'chirish</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Haqiqatan ham "{workshop.name}" atolyesini o'chirmoqchimisiz? Bu amalni bekor qilib
+                                bo'lmaydi.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteWorkshop(workshop.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={isDeleting}
+                              >
+                                {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                O'chirish
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

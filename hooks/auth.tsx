@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRefreshTokenMutation } from "@/lib/service/authApi";
-import { useGetOrganizationsQuery } from "@/lib/service/api";
+import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi";
 
 interface DecodedToken {
   exp: number;

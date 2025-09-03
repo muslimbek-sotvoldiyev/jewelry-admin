@@ -18,28 +18,13 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Clock, User, Mail, Phone, Calendar, Activity, History } from "lucide-react"
+import { ArrowLeft, Clock, User, Mail, Phone, Calendar, Activity, History, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
+import { useGetOrganizationByIdQuery, useUpdateOrganizationMutation } from "@/lib/service/atolyeApi"
 
-// Mock workshop detail data
-const workshopDetail = {
-  id: "1",
-  name: "Atolye-1",
-  owner: "Ahmad Karimov",
-  status: "active",
-  currentMaterial: "250gr Oltin",
-  workTime: "2 soat 30 daqiqa",
-  process: "Tozalash",
-  email: "atolye1@jewelry.com",
-  phone: "+998901234567",
-  createdAt: "2024-01-15",
-  totalWorkTime: "45 soat 20 daqiqa",
-  completedJobs: 23,
-  currentStartTime: "2024-01-25 09:30",
-}
-
-// Mock material history
+// Mock material history - this would come from a separate API endpoint
 const materialHistory = [
   {
     id: "1",
@@ -69,9 +54,16 @@ const materialHistory = [
 
 export default function WorkshopDetailPage() {
   const params = useParams()
+  const { toast } = useToast()
+  const workshopId = params.id as string
+
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
   const [newStatus, setNewStatus] = useState("")
   const [statusNote, setStatusNote] = useState("")
+
+  // API hooks
+  const { data: workshop, isLoading, error, refetch } = useGetOrganizationByIdQuery(workshopId)
+  const [updateOrganization, { isLoading: isUpdating }] = useUpdateOrganizationMutation()
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -99,26 +91,93 @@ export default function WorkshopDetailPage() {
     }
   }
 
-  const handleStatusChange = () => {
-    // TODO: Implement status change logic
-    console.log("Changing status to:", newStatus, "Note:", statusNote)
-    setIsStatusDialogOpen(false)
-    setNewStatus("")
-    setStatusNote("")
+  const handleStatusChange = async () => {
+    if (!newStatus) {
+      toast({
+        title: "Xatolik",
+        description: "Yangi holatni tanlang",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const updateData = {
+        id: workshopId,
+        status: newStatus as "active" | "busy" | "stopped",
+      }
+
+      await updateOrganization(updateData).unwrap()
+
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Atolye holati o'zgartirildi",
+      })
+
+      setIsStatusDialogOpen(false)
+      setNewStatus("")
+      setStatusNote("")
+
+      refetch()
+    } catch (error) {
+      console.error("Status update error:", error)
+      toast({
+        title: "Xatolik",
+        description: "Holat o'zgartirishda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span>Ma'lumotlar yuklanmoqda...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !workshop) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-destructive">Xatolik</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Atolye ma'lumotlarini yuklashda xatolik yuz berdi.</p>
+            <div className="flex gap-2 mt-4">
+              <Button onClick={() => refetch()} variant="outline">
+                Qayta urinish
+              </Button>
+              <Link href="/workshops">
+                <Button variant="outline">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Orqaga qaytish
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/workshops">
+        <Link href="/workshops">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Orqaga
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-balance">{workshopDetail.name}</h1>
+          <h1 className="text-3xl font-bold text-balance">{workshop.name}</h1>
           <p className="text-muted-foreground">Atolye tafsilotlari va faollik tarixi</p>
         </div>
         <div className="flex gap-2">
@@ -132,7 +191,7 @@ export default function WorkshopDetailPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Atolye holatini o'zgartirish</DialogTitle>
-                <DialogDescription>{workshopDetail.name} uchun yangi holat tanlang</DialogDescription>
+                <DialogDescription>{workshop.name} uchun yangi holat tanlang</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
@@ -158,7 +217,10 @@ export default function WorkshopDetailPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleStatusChange}>O'zgartirish</Button>
+                <Button onClick={handleStatusChange} disabled={isUpdating}>
+                  {isUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  O'zgartirish
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -177,28 +239,28 @@ export default function WorkshopDetailPage() {
               <User className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Egasi</p>
-                <p className="text-sm text-muted-foreground">{workshopDetail.owner}</p>
+                <p className="text-sm text-muted-foreground">{workshop.owner}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Email</p>
-                <p className="text-sm text-muted-foreground">{workshopDetail.email}</p>
+                <p className="text-sm text-muted-foreground">{workshop.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Telefon</p>
-                <p className="text-sm text-muted-foreground">{workshopDetail.phone}</p>
+                <p className="text-sm text-muted-foreground">{workshop.phone}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Yaratilgan</p>
-                <p className="text-sm text-muted-foreground">{workshopDetail.createdAt}</p>
+                <p className="text-sm text-muted-foreground">{workshop.createdAt}</p>
               </div>
             </div>
           </CardContent>
@@ -212,32 +274,32 @@ export default function WorkshopDetailPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Holat</span>
-              {getStatusBadge(workshopDetail.status)}
+              {getStatusBadge(workshop.status)}
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Hozirgi material</span>
-              <span className="text-sm">{workshopDetail.currentMaterial}</span>
+              <span className="text-sm">{workshop.currentMaterial || "-"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Jarayon</span>
-              <span className="text-sm">{workshopDetail.process}</span>
+              <span className="text-sm">{workshop.process || "-"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Ish vaqti</span>
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span className="text-sm">{workshopDetail.workTime}</span>
+                <span className="text-sm">{workshop.workTime || "-"}</span>
               </div>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Jami ish vaqti</span>
-              <span className="text-sm">{workshopDetail.totalWorkTime}</span>
+              <span className="text-sm">{workshop.totalWorkTime || "-"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Bajarilgan ishlar</span>
-              <span className="text-sm">{workshopDetail.completedJobs}</span>
+              <span className="text-sm">{workshop.completedJobs || 0}</span>
             </div>
           </CardContent>
         </Card>
