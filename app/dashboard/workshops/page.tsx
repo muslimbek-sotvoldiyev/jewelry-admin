@@ -436,7 +436,7 @@ export default function WorkshopsPage() {
                     <TableCell>{workshop.process || "-"}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Link href={`/workshops/${workshop.id}`}>
+                        <Link href={`/dashboard/workshops/${workshop.id}`}>
                           <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
                           </Button>
