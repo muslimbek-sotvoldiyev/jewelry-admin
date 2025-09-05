@@ -43,11 +43,20 @@ import { useDispatch } from "react-redux"
 interface Inventory {
   id: number
   quantity: string
-  organization_id: number
-  material_id: number
-  organization_name?: string
-  material_name?: string
-  material_unit?: string
+  organization: {
+    id: number
+    name: string
+    type: string
+    created_at: string
+    updated_at: string
+  }
+  material: {
+    id: number
+    name: string
+    unit: "g" | "pcs" | "ct"
+    created_at: string
+    updated_at: string
+  }
   created_at: string
   updated_at: string
 }
@@ -99,30 +108,30 @@ export default function InventoryPage() {
   const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
   const [formData, setFormData] = useState({
     quantity: "",
-    organization_id: "",
-    material_id: "",
+    organization: "",
+    material: "",
   })
 
   const resetForm = () => {
     setFormData({
       quantity: "",
-      organization_id: "",
-      material_id: "",
+      organization: "",
+      material: "",
     })
   }
 
   const getSelectedMaterial = (): Material | undefined => {
-    return materials.find((m: Material) => m.id.toString() === formData.material_id)
+    return materials.find((m: Material) => m.id.toString() === formData.material)
   }
 
   const getQuantityLabel = () => {
     const material = getSelectedMaterial()
     if (!material) return "Miqdor"
-    return `Miqdor (${unitLabels[material.unit as keyof typeof unitLabels]})`
+    return `Miqdor (${unitLabels[material.unit]})`
   }
 
   const handleCreateInventory = async () => {
-    if (!formData.quantity || !formData.organization_id || !formData.material_id) {
+    if (!formData.quantity || !formData.organization || !formData.material) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -133,8 +142,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization_id: Number.parseInt(formData.organization_id),
-      material_id: Number.parseInt(formData.material_id),
+      organization: Number.parseInt(formData.organization),
+      material: Number.parseInt(formData.material),
     }
 
     try {
@@ -160,8 +169,8 @@ export default function InventoryPage() {
     setSelectedInventory(inventoryItem)
     setFormData({
       quantity: inventoryItem.quantity,
-      organization_id: inventoryItem.organization_id.toString(),
-      material_id: inventoryItem.material_id.toString(),
+      organization: inventoryItem.organization.id.toString(),
+      material: inventoryItem.material.id.toString(),
     })
     setIsEditDialogOpen(true)
   }
@@ -169,7 +178,7 @@ export default function InventoryPage() {
   const handleUpdateInventory = async () => {
     if (!selectedInventory) return
 
-    if (!formData.quantity || !formData.organization_id || !formData.material_id) {
+    if (!formData.quantity || !formData.organization || !formData.material) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -180,8 +189,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization_id: Number.parseInt(formData.organization_id),
-      material_id: Number.parseInt(formData.material_id),
+      organization: Number.parseInt(formData.organization),
+      material: Number.parseInt(formData.material),
     }
 
     try {
@@ -278,18 +287,24 @@ export default function InventoryPage() {
               <div className="grid gap-2">
                 <Label htmlFor="material">Material *</Label>
                 <Select
-                  value={formData.material_id}
-                  onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
+                  value={formData.material}
+                  onValueChange={(value) => setFormData({ ...formData, material: value, quantity: "" })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Materialni tanlang" />
                   </SelectTrigger>
                   <SelectContent>
-                    {materials.map((material: Material) => (
-                      <SelectItem key={material.id} value={material.id.toString()}>
-                        {material.name} ({unitLabels[material.unit]})
+                    {materials.length === 0 ? (
+                      <SelectItem value="no-materials" disabled>
+                        Material topilmadi
                       </SelectItem>
-                    ))}
+                    ) : (
+                      materials.map((material: Material) => (
+                        <SelectItem key={material.id} value={material.id.toString()}>
+                          {material.name} ({unitLabels[material.unit]})
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -297,18 +312,24 @@ export default function InventoryPage() {
               <div className="grid gap-2">
                 <Label htmlFor="organization">Tashkilot *</Label>
                 <Select
-                  value={formData.organization_id}
-                  onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+                  value={formData.organization}
+                  onValueChange={(value) => setFormData({ ...formData, organization: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Tashkilotni tanlang" />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizations.map((org: Organization) => (
-                      <SelectItem key={org.id} value={org.id.toString()}>
-                        {org.name}
+                    {organizations.length === 0 ? (
+                      <SelectItem value="no-organizations" disabled>
+                        Tashkilot topilmadi
                       </SelectItem>
-                    ))}
+                    ) : (
+                      organizations.map((org: Organization) => (
+                        <SelectItem key={org.id} value={org.id.toString()}>
+                          {org.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -322,7 +343,7 @@ export default function InventoryPage() {
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
-                  disabled={!formData.material_id}
+                  disabled={!formData.material}
                 />
               </div>
             </div>
@@ -379,9 +400,6 @@ export default function InventoryPage() {
           ) : (
             <div className="space-y-4">
               {inventory.map((item: Inventory) => {
-                const material = materials.find((m: Material) => m.id === item.material_id)
-                const organization = organizations.find((o: Organization) => o.id === item.organization_id)
-
                 return (
                   <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-4">
@@ -391,17 +409,17 @@ export default function InventoryPage() {
 
                       <div>
                         <div className="flex items-center space-x-2">
-                          <h3 className="font-semibold">{material?.name || "Material topilmadi"}</h3>
-                          {material && (
-                            <Badge className={unitColors[material.unit as keyof typeof unitColors]}>
-                              {item.quantity} {material && material.unit in unitLabels ? unitLabels[material.unit as keyof typeof unitLabels] : ""}
-                            </Badge>
-                          )}
-                          {!material && <Badge variant="secondary">{item.quantity}</Badge>}
+                          <h3 className="font-semibold">{item.material.name}</h3>
+                          <Badge className={unitColors[item.material.unit]}>
+                            {item.quantity} {unitLabels[item.material.unit]}
+                          </Badge>
                         </div>
                         <div className="flex items-center space-x-2 mt-1">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">{organization?.name || "Tashkilot topilmadi"}</p>
+                          <p className="text-sm text-muted-foreground">{item.organization.name}</p>
+                          <Badge variant="outline" className="text-xs">
+                            {item.organization.type}
+                          </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">ID: {item.id}</p>
                         <p className="text-sm text-muted-foreground">
@@ -447,8 +465,8 @@ export default function InventoryPage() {
             <div className="grid gap-2">
               <Label htmlFor="edit-material">Material *</Label>
               <Select
-                value={formData.material_id}
-                onValueChange={(value) => setFormData({ ...formData, material_id: value })}
+                value={formData.material}
+                onValueChange={(value) => setFormData({ ...formData, material: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Materialni tanlang" />
@@ -466,8 +484,8 @@ export default function InventoryPage() {
             <div className="grid gap-2">
               <Label htmlFor="edit-organization">Tashkilot *</Label>
               <Select
-                value={formData.organization_id}
-                onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+                value={formData.organization}
+                onValueChange={(value) => setFormData({ ...formData, organization: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tashkilotni tanlang" />
