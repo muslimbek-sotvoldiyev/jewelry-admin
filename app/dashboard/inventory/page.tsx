@@ -43,8 +43,8 @@ import { useDispatch } from "react-redux"
 interface Inventory {
   id: number
   quantity: string
-  organization: number
-  material: number
+  organization_id: number
+  material_id: number
   organization_name?: string
   material_name?: string
   material_unit?: string
@@ -99,20 +99,20 @@ export default function InventoryPage() {
   const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
   const [formData, setFormData] = useState({
     quantity: "",
-    organization: "",
-    material: "",
+    organization_id: "",
+    material_id: "",
   })
 
   const resetForm = () => {
     setFormData({
       quantity: "",
-      organization: "",
-      material: "",
+      organization_id: "",
+      material_id: "",
     })
   }
 
   const getSelectedMaterial = (): Material | undefined => {
-    return materials.find((m: Material) => m.id.toString() === formData.material)
+    return materials.find((m: Material) => m.id.toString() === formData.material_id)
   }
 
   const getQuantityLabel = () => {
@@ -122,7 +122,7 @@ export default function InventoryPage() {
   }
 
   const handleCreateInventory = async () => {
-    if (!formData.quantity || !formData.organization || !formData.material) {
+    if (!formData.quantity || !formData.organization_id || !formData.material_id) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -133,8 +133,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization: Number.parseInt(formData.organization),
-      material: Number.parseInt(formData.material),
+      organization_id: Number.parseInt(formData.organization_id),
+      material_id: Number.parseInt(formData.material_id),
     }
 
     try {
@@ -160,8 +160,8 @@ export default function InventoryPage() {
     setSelectedInventory(inventoryItem)
     setFormData({
       quantity: inventoryItem.quantity,
-      organization: inventoryItem.organization.toString(),
-      material: inventoryItem.material.toString(),
+      organization_id: inventoryItem.organization_id.toString(),
+      material_id: inventoryItem.material_id.toString(),
     })
     setIsEditDialogOpen(true)
   }
@@ -169,7 +169,7 @@ export default function InventoryPage() {
   const handleUpdateInventory = async () => {
     if (!selectedInventory) return
 
-    if (!formData.quantity || !formData.organization || !formData.material) {
+    if (!formData.quantity || !formData.organization_id || !formData.material_id) {
       toast({
         title: "Xatolik",
         description: "Barcha majburiy maydonlarni to'ldiring",
@@ -180,8 +180,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization: Number.parseInt(formData.organization),
-      material: Number.parseInt(formData.material),
+      organization_id: Number.parseInt(formData.organization_id),
+      material_id: Number.parseInt(formData.material_id),
     }
 
     try {
@@ -278,8 +278,8 @@ export default function InventoryPage() {
               <div className="grid gap-2">
                 <Label htmlFor="material">Material *</Label>
                 <Select
-                  value={formData.material}
-                  onValueChange={(value) => setFormData({ ...formData, material: value, quantity: "" })}
+                  value={formData.material_id}
+                  onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Materialni tanlang" />
@@ -297,8 +297,8 @@ export default function InventoryPage() {
               <div className="grid gap-2">
                 <Label htmlFor="organization">Tashkilot *</Label>
                 <Select
-                  value={formData.organization}
-                  onValueChange={(value) => setFormData({ ...formData, organization: value })}
+                  value={formData.organization_id}
+                  onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Tashkilotni tanlang" />
@@ -322,7 +322,7 @@ export default function InventoryPage() {
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
-                  disabled={!formData.material}
+                  disabled={!formData.material_id}
                 />
               </div>
             </div>
@@ -379,8 +379,8 @@ export default function InventoryPage() {
           ) : (
             <div className="space-y-4">
               {inventory.map((item: Inventory) => {
-                const material = materials.find((m: Material) => m.id === item.material)
-                const organization = organizations.find((o: Organization) => o.id === item.organization)
+                const material = materials.find((m: Material) => m.id === item.material_id)
+                const organization = organizations.find((o: Organization) => o.id === item.organization_id)
 
                 return (
                   <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -447,8 +447,8 @@ export default function InventoryPage() {
             <div className="grid gap-2">
               <Label htmlFor="edit-material">Material *</Label>
               <Select
-                value={formData.material}
-                onValueChange={(value) => setFormData({ ...formData, material: value })}
+                value={formData.material_id}
+                onValueChange={(value) => setFormData({ ...formData, material_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Materialni tanlang" />
@@ -466,8 +466,8 @@ export default function InventoryPage() {
             <div className="grid gap-2">
               <Label htmlFor="edit-organization">Tashkilot *</Label>
               <Select
-                value={formData.organization}
-                onValueChange={(value) => setFormData({ ...formData, organization: value })}
+                value={formData.organization_id}
+                onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tashkilotni tanlang" />
