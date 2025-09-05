@@ -24,6 +24,8 @@ import useAuth from "@/hooks/auth"
 
 const navigation = [
   { name: "Bosh sahifa", href: "/dashboard", icon: Home },
+  { name: "Materiallar", href: "/dashboard/materials", icon: Home },
+  { name: "Inventar", href: "/dashboard/inventory", icon: Home },
   { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory },
   { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight },
   { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell },

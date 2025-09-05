@@ -1,0 +1,536 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package2, Building2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
+import {
+  useGetInventoryQuery,
+  useAddInventoryMutation,
+  useUpdateInventoryMutation,
+  useDeleteInventoryMutation,
+  InventoryApi,
+} from "@/lib/service/inventoryApi"
+import { useGetMaterialsQuery } from "@/lib/service/materialsApi"
+import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
+import { useDispatch } from "react-redux"
+
+interface Inventory {
+  id: number
+  quantity: string
+  organization: number
+  material: number
+  organization_name?: string
+  material_name?: string
+  material_unit?: string
+  created_at: string
+  updated_at: string
+}
+
+interface Material {
+  id: number
+  name: string
+  unit: "g" | "pcs" | "ct"
+}
+
+interface Organization {
+  id: number
+  name: string
+}
+
+const unitLabels = {
+  g: "Gram",
+  pcs: "Dona",
+  ct: "Karat",
+}
+
+const unitColors = {
+  g: "bg-blue-100 text-blue-800",
+  pcs: "bg-green-100 text-green-800",
+  ct: "bg-purple-100 text-purple-800",
+}
+
+export default function InventoryPage() {
+  const dispatch = useDispatch()
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const {
+    data: inventory = [],
+    isLoading: inventoryLoading,
+    error: inventoryError,
+  } = useGetInventoryQuery({
+    search: searchTerm,
+  })
+  const { data: materials = [], isLoading: materialsLoading } = useGetMaterialsQuery(undefined)
+  const { data: organizations = [], isLoading: organizationsLoading } = useGetOrganizationsQuery(undefined)
+
+  const [addInventory] = useAddInventoryMutation()
+  const [updateInventory] = useUpdateInventoryMutation()
+  const [deleteInventory] = useDeleteInventoryMutation()
+
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
+  const [formData, setFormData] = useState({
+    quantity: "",
+    organization: "",
+    material: "",
+  })
+
+  const resetForm = () => {
+    setFormData({
+      quantity: "",
+      organization: "",
+      material: "",
+    })
+  }
+
+  const getSelectedMaterial = (): Material | undefined => {
+    return materials.find((m: Material) => m.id.toString() === formData.material)
+  }
+
+  const getQuantityLabel = () => {
+    const material = getSelectedMaterial()
+    if (!material) return "Miqdor"
+    return `Miqdor (${unitLabels[material.unit as keyof typeof unitLabels]})`
+  }
+
+  const handleCreateInventory = async () => {
+    if (!formData.quantity || !formData.organization || !formData.material) {
+      toast({
+        title: "Xatolik",
+        description: "Barcha majburiy maydonlarni to'ldiring",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const apiData = {
+      quantity: formData.quantity,
+      organization: Number.parseInt(formData.organization),
+      material: Number.parseInt(formData.material),
+    }
+
+    try {
+      await addInventory(apiData).unwrap()
+      resetForm()
+      setIsCreateDialogOpen(false)
+
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Yangi inventar yaratildi",
+      })
+      dispatch(InventoryApi.util.resetApiState())
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Inventar yaratishda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditInventory = (inventoryItem: Inventory) => {
+    setSelectedInventory(inventoryItem)
+    setFormData({
+      quantity: inventoryItem.quantity,
+      organization: inventoryItem.organization.toString(),
+      material: inventoryItem.material.toString(),
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdateInventory = async () => {
+    if (!selectedInventory) return
+
+    if (!formData.quantity || !formData.organization || !formData.material) {
+      toast({
+        title: "Xatolik",
+        description: "Barcha majburiy maydonlarni to'ldiring",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const apiData = {
+      quantity: formData.quantity,
+      organization: Number.parseInt(formData.organization),
+      material: Number.parseInt(formData.material),
+    }
+
+    try {
+      await updateInventory({ id: selectedInventory.id, ...apiData }).unwrap()
+      resetForm()
+      setIsEditDialogOpen(false)
+      setSelectedInventory(null)
+
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Inventar ma'lumotlari yangilandi",
+      })
+      dispatch(InventoryApi.util.resetApiState())
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Inventar yangilashda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteInventory = async (inventoryId: number) => {
+    try {
+      await deleteInventory(inventoryId).unwrap()
+      setIsDeleteDialogOpen(false)
+      setSelectedInventory(null)
+
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Inventar o'chirildi",
+      })
+      dispatch(InventoryApi.util.resetApiState())
+    } catch (error) {
+      toast({
+        title: "Xatolik",
+        description: "Inventar o'chirishda xatolik yuz berdi",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const confirmDelete = (inventoryItem: Inventory) => {
+    setSelectedInventory(inventoryItem)
+    setIsDeleteDialogOpen(true)
+  }
+
+  if (inventoryLoading || materialsLoading || organizationsLoading) {
+    return (
+      <div className="px-6 space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (inventoryError) {
+    return (
+      <div className="px-6 space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Inventarni yuklashda xatolik yuz berdi</p>
+            <Button onClick={() => window.location.reload()}>Qayta urinish</Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Inventar</h1>
+          <p className="text-muted-foreground">Material inventarini boshqaring</p>
+        </div>
+
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Yangi inventar
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>Yangi inventar yaratish</DialogTitle>
+              <DialogDescription>Tizimga yangi inventar qo'shing</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="material">Material *</Label>
+                <Select
+                  value={formData.material}
+                  onValueChange={(value) => setFormData({ ...formData, material: value, quantity: "" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Materialni tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {materials.map((material: Material) => (
+                      <SelectItem key={material.id} value={material.id.toString()}>
+                        {material.name} ({unitLabels[material.unit]})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="organization">Tashkilot *</Label>
+                <Select
+                  value={formData.organization}
+                  onValueChange={(value) => setFormData({ ...formData, organization: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tashkilotni tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((org: Organization) => (
+                      <SelectItem key={org.id} value={org.id.toString()}>
+                        {org.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="quantity">{getQuantityLabel()} *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  step="0.01"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                  placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
+                  disabled={!formData.material}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false)
+                  resetForm()
+                }}
+              >
+                Bekor qilish
+              </Button>
+              <Button onClick={handleCreateInventory}>Yaratish</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Inventarni qidirish..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+
+      {/* Inventory Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Inventar ro'yxati</CardTitle>
+          <CardDescription>Jami {inventory.length} ta inventar yozuvi</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {inventory.length === 0 ? (
+            <div className="text-center py-12">
+              <Package2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Inventar topilmadi</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm ? "Qidiruv bo'yicha natija topilmadi" : "Hozircha inventar yozuvlari yo'q"}
+              </p>
+              {searchTerm && (
+                <Button variant="outline" onClick={() => setSearchTerm("")}>
+                  Qidiruvni tozalash
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {inventory.map((item: Inventory) => {
+                const material = materials.find((m: Material) => m.id === item.material)
+                const organization = organizations.find((o: Organization) => o.id === item.organization)
+
+                return (
+                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                        <Package2 className="h-5 w-5" />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-semibold">{material?.name || "Material topilmadi"}</h3>
+                          {material && (
+                            <Badge className={unitColors[material.unit as keyof typeof unitColors]}>
+                              {item.quantity} {material && material.unit in unitLabels ? unitLabels[material.unit as keyof typeof unitLabels] : ""}
+                            </Badge>
+                          )}
+                          {!material && <Badge variant="secondary">{item.quantity}</Badge>}
+                        </div>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground">{organization?.name || "Tashkilot topilmadi"}</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">ID: {item.id}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Yaratilgan: {new Date(item.created_at).toLocaleDateString("uz-UZ")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditInventory(item)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Tahrirlash
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(item)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          O'chirish
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Inventarni tahrirlash</DialogTitle>
+            <DialogDescription>Inventar ma'lumotlarini yangilang</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-material">Material *</Label>
+              <Select
+                value={formData.material}
+                onValueChange={(value) => setFormData({ ...formData, material: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Materialni tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {materials.map((material: Material) => (
+                    <SelectItem key={material.id} value={material.id.toString()}>
+                      {material.name} ({unitLabels[material.unit]})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-organization">Tashkilot *</Label>
+              <Select
+                value={formData.organization}
+                onValueChange={(value) => setFormData({ ...formData, organization: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Tashkilotni tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org: Organization) => (
+                    <SelectItem key={org.id} value={org.id.toString()}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-quantity">{getQuantityLabel()} *</Label>
+              <Input
+                id="edit-quantity"
+                type="number"
+                step="0.01"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false)
+                resetForm()
+                setSelectedInventory(null)
+              }}
+            >
+              Bekor qilish
+            </Button>
+            <Button onClick={handleUpdateInventory}>Yangilash</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inventarni o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              Haqiqatan ham bu inventar yozuvini o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Yo'q</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedInventory && handleDeleteInventory(selectedInventory.id)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Ha, o'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
