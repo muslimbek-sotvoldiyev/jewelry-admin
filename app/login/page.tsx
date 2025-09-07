@@ -10,9 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Gem, Lock, User } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useLoginMutation } from "@/lib/service/authApi"
+import authApi, { useLoginMutation } from "@/lib/service/authApi"
 import { useDispatch } from "react-redux"
-import api from "@/lib/service/api"
+// import api from "@/lib/service/api"
 
 export default function LoginPage() {
   const dispatch = useDispatch()
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
       if (result && result.access) {
         saveToLocalStorage(result)
-        dispatch(api.util.resetApiState())
+        dispatch(authApi.util.resetApiState())
         router.push("/dashboard")
       } else {
         setError("Login failed. Please try again.")
@@ -80,7 +80,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2">160gr
               <Label htmlFor="username">Username</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

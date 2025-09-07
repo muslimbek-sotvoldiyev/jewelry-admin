@@ -6,19 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Search, Eye, ArrowLeftRight, Clock, CheckCircle, XCircle } from "lucide-react"
+
+import Link from "next/link"
+
+
 
 // Mock transfer data
 const transfers = [
@@ -143,15 +137,6 @@ const getMaterialIcon = (type: string) => {
 export default function TransfersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [newTransfer, setNewTransfer] = useState({
-    from: "",
-    to: "",
-    materialType: "",
-    amount: "",
-    unit: "",
-    note: "",
-  })
 
   const filteredTransfers = transfers.filter((transfer) => {
     const matchesSearch =
@@ -165,12 +150,7 @@ export default function TransfersPage() {
     return matchesSearch && matchesStatus
   })
 
-  const handleCreateTransfer = () => {
-    // TODO: Implement transfer creation logic
-    console.log("Creating transfer:", newTransfer)
-    setIsCreateDialogOpen(false)
-    setNewTransfer({ from: "", to: "", materialType: "", amount: "", unit: "", note: "" })
-  }
+
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -180,117 +160,14 @@ export default function TransfersPage() {
           <h1 className="text-3xl font-bold text-balance">Transferlar</h1>
           <p className="text-muted-foreground">Material almashinuvi va transferlarni boshqarish</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Yangi transfer
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Yangi transfer yaratish</DialogTitle>
-              <DialogDescription>Material transferi uchun ma'lumotlarni kiriting</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="from">Kimdan</Label>
-                  <Select
-                    value={newTransfer.from}
-                    onValueChange={(value) => setNewTransfer({ ...newTransfer, from: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="safe">Safe</SelectItem>
-                      <SelectItem value="atolye-1">Atolye-1</SelectItem>
-                      <SelectItem value="atolye-2">Atolye-2</SelectItem>
-                      <SelectItem value="atolye-3">Atolye-3</SelectItem>
-                      <SelectItem value="atolye-4">Atolye-4</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="to">Kimga</Label>
-                  <Select
-                    value={newTransfer.to}
-                    onValueChange={(value) => setNewTransfer({ ...newTransfer, to: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="safe">Safe</SelectItem>
-                      <SelectItem value="atolye-1">Atolye-1</SelectItem>
-                      <SelectItem value="atolye-2">Atolye-2</SelectItem>
-                      <SelectItem value="atolye-3">Atolye-3</SelectItem>
-                      <SelectItem value="atolye-4">Atolye-4</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="materialType">Material turi</Label>
-                <Select
-                  value={newTransfer.materialType}
-                  onValueChange={(value) => setNewTransfer({ ...newTransfer, materialType: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Material turini tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gold">🥇 Oltin</SelectItem>
-                    <SelectItem value="silver">🥈 Kumush</SelectItem>
-                    <SelectItem value="diamond">💎 Olmos</SelectItem>
-                    <SelectItem value="pearl">🤍 Marvarid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="amount">Miqdor</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="250"
-                    value={newTransfer.amount}
-                    onChange={(e) => setNewTransfer({ ...newTransfer, amount: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="unit">Birlik</Label>
-                  <Select
-                    value={newTransfer.unit}
-                    onValueChange={(value) => setNewTransfer({ ...newTransfer, unit: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Birlik" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="gr">Gramm</SelectItem>
-                      <SelectItem value="kg">Kilogramm</SelectItem>
-                      <SelectItem value="dona">Dona</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="note">Izoh</Label>
-                <Textarea
-                  id="note"
-                  placeholder="Transfer maqsadi yoki qo'shimcha ma'lumot..."
-                  value={newTransfer.note}
-                  onChange={(e) => setNewTransfer({ ...newTransfer, note: e.target.value })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleCreateTransfer}>Transfer yaratish</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+
+        <Button asChild>
+          <Link href="/dashboard/transfers/create">
+            <Plus className="h-4 w-4 mr-2" />
+            Yangi transfer
+          </Link>
+        </Button>
+
       </div>
 
       {/* Stats Cards */}

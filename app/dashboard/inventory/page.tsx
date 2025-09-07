@@ -40,49 +40,12 @@ import { useGetMaterialsQuery } from "@/lib/service/materialsApi"
 import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
 import { useDispatch } from "react-redux"
 
-interface Inventory {
-  id: number
-  quantity: string
-  organization: {
-    id: number
-    name: string
-    type: string
-    created_at: string
-    updated_at: string
-  }
-  material: {
-    id: number
-    name: string
-    unit: "g" | "pcs" | "ct"
-    created_at: string
-    updated_at: string
-  }
-  created_at: string
-  updated_at: string
-}
+import Material from "@/types/material"
+import Inventory from "@/types/inventory"
+import Organization from "@/types/organization"
+import { unitColors, unitLabels } from "@/constants/units"
 
-interface Material {
-  id: number
-  name: string
-  unit: "g" | "pcs" | "ct"
-}
 
-interface Organization {
-  id: number
-  name: string
-}
-
-const unitLabels = {
-  g: "Gram",
-  pcs: "Dona",
-  ct: "Karat",
-}
-
-const unitColors = {
-  g: "bg-blue-100 text-blue-800",
-  pcs: "bg-green-100 text-green-800",
-  ct: "bg-purple-100 text-purple-800",
-}
 
 export default function InventoryPage() {
   const dispatch = useDispatch()
@@ -106,6 +69,7 @@ export default function InventoryPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
+
   const [formData, setFormData] = useState({
     quantity: "",
     organization_id: "",
