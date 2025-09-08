@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, Loader2 } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
 import { useGetInventoryQuery } from "@/lib/service/inventoryApi"
 import { useAddTransactionMutation } from "@/lib/service/transactionsApi"
@@ -27,8 +27,8 @@ export default function CreateTransferPage() {
   const [error, setError] = useState("")
 
   const parseQuantity = (quantity: any): number => {
-    if (typeof quantity === 'number') return quantity
-    if (typeof quantity === 'string') {
+    if (typeof quantity === "number") return quantity
+    if (typeof quantity === "string") {
       const parsed = Number.parseFloat(quantity)
       return Number.isNaN(parsed) ? 0 : parsed
     }
@@ -36,7 +36,7 @@ export default function CreateTransferPage() {
   }
 
   // Inventorylarni filterlash - faqat quantity > 0 bo'lganlarini ko'rsatish
-  const availableInventories = inventories.filter(inv => parseQuantity(inv.quantity) > 0)
+  const availableInventories = inventories.filter((inv) => parseQuantity(inv.quantity) > 0)
 
   const isValidQuantity = (quantity: string): boolean => {
     const num = Number.parseFloat(quantity)
@@ -70,7 +70,9 @@ export default function CreateTransferPage() {
     }
 
     if (newTotalQty > availableQty) {
-      setError(`"${selectedInv.name}" uchun mavjud miqdor: ${availableQty.toFixed(2)} ${selectedInv.unit || 'dona'}. Transfer miqdori oshib ketdi.`)
+      setError(
+        `"${selectedInv.name}" uchun mavjud miqdor: ${availableQty.toFixed(2)} ${selectedInv.unit || "dona"}. Transfer miqdori oshib ketdi.`,
+      )
       return
     }
 
@@ -115,7 +117,7 @@ export default function CreateTransferPage() {
       setItems([])
       setCurrentItem({ inventory: "", quantity: "" })
       setError("")
-      setTimeout(() => router.push('/dashboard/transfers'), 1000)
+      setTimeout(() => router.push("/dashboard/transfers"), 1000)
     } catch (error: any) {
       const errorMessage = error?.data?.message || "Transfer yaratishda xatolik."
       setError(errorMessage)
@@ -185,11 +187,7 @@ export default function CreateTransferPage() {
           </Button>
         </div>
 
-        {error && (
-          <p className="text-red-500 text-sm bg-red-50 px-4 py-2 rounded-md border border-red-200">
-            {error}
-          </p>
-        )}
+        {error && <p className="text-red-500 text-sm bg-red-50 px-4 py-2 rounded-md border border-red-200">{error}</p>}
 
         <Card className="shadow-sm border border-gray-200">
           <CardHeader className="border-b border-gray-200 pb-3">
@@ -261,9 +259,11 @@ export default function CreateTransferPage() {
                 />
                 {currentItem.inventory && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Maks: {parseQuantity(
-                      inventories.find(inv => String(inv.id) === currentItem.inventory)?.quantity
-                    ).toFixed(2)} {inventories.find(inv => String(inv.id) === currentItem.inventory)?.unit || ''}
+                    Maks:{" "}
+                    {parseQuantity(
+                      inventories.find((inv) => String(inv.id) === currentItem.inventory)?.quantity,
+                    ).toFixed(2)}{" "}
+                    {inventories.find((inv) => String(inv.id) === currentItem.inventory)?.unit || ""}
                   </p>
                 )}
               </div>
@@ -329,7 +329,7 @@ export default function CreateTransferPage() {
           </CardContent>
         </Card>
 
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === "development" && (
           <Card className="shadow-sm border border-gray-200 bg-gray-50">
             <CardHeader className="border-b border-gray-200 pb-3">
               <CardTitle className="text-sm text-gray-600">Debug</CardTitle>
