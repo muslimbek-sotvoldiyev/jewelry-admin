@@ -1,98 +1,133 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Plus, Search, Eye, ArrowLeftRight, Clock, CheckCircle, XCircle } from "lucide-react"
-
-import Link from "next/link"
+import { Search, Eye, CheckCircle, Clock, XCircle, ArrowLeftRight } from "lucide-react"
 
 
 
-// Mock transfer data
-const transfers = [
+const apiData = [
   {
-    id: "T001",
-    from: "Safe",
-    to: "Atolye-1",
-    material: "250gr Oltin",
-    materialType: "gold",
-    amount: 250,
-    unit: "gr",
-    status: "confirmed",
-    senderConfirmed: true,
-    receiverConfirmed: true,
-    createdAt: "2024-01-25 09:30",
-    confirmedAt: "2024-01-25 09:45",
-    note: "Tozalash uchun",
+    "id": 1,
+    "items": [],
+    "sender": {
+      "id": 1,
+      "created_at": "2025-09-01T15:42:47.969307Z",
+      "updated_at": "2025-09-01T15:42:47.980843Z",
+      "name": "Markaziy Bank",
+      "type": "bank"
+    },
+    "receiver": {
+      "id": 2,
+      "created_at": "2025-09-01T15:42:47.969307Z",
+      "updated_at": "2025-09-01T15:42:47.980843Z",
+      "name": "Toshkent Atolye",
+      "type": "atolye"
+    },
+    "created_at": "2025-09-07T17:43:19.923359Z",
+    "updated_at": "2025-09-07T18:39:02.819548Z",
+    "status": "pending"
   },
   {
-    id: "T002",
-    from: "Atolye-1",
-    to: "Atolye-2",
-    material: "180gr Kumush",
-    materialType: "silver",
-    amount: 180,
-    unit: "gr",
-    status: "pending_receiver",
-    senderConfirmed: true,
-    receiverConfirmed: false,
-    createdAt: "2024-01-25 14:20",
-    confirmedAt: null,
-    note: "Proba o'zgartirish uchun",
+    "id": 7,
+    "items": [
+      {
+        "id": 10,
+        "inventory": {
+          "id": 1,
+          "organization": {
+            "id": 2,
+            "created_at": "2025-09-01T15:42:47.969307Z",
+            "updated_at": "2025-09-01T15:42:47.980843Z",
+            "name": "Toshkent Atolye",
+            "type": "atolye"
+          },
+          "material": {
+            "id": 1,
+            "created_at": "2025-09-01T15:42:48.001630Z",
+            "updated_at": "2025-09-01T15:45:36.296176Z",
+            "name": "Oltin (24K)",
+            "unit": "g"
+          },
+          "quantity": "6.600",
+          "created_at": "2025-09-01T15:44:03.269589Z",
+          "updated_at": "2025-09-01T15:44:03.269704Z"
+        },
+        "quantity": "25.000",
+        "transaction": 7
+      },
+      {
+        "id": 11,
+        "inventory": {
+          "id": 3,
+          "organization": {
+            "id": 2,
+            "created_at": "2025-09-01T15:42:47.969307Z",
+            "updated_at": "2025-09-01T15:42:47.980843Z",
+            "name": "Toshkent Atolye",
+            "type": "atolye"
+          },
+          "material": {
+            "id": 2,
+            "created_at": "2025-09-01T15:42:48.001630Z",
+            "updated_at": "2025-09-07T19:55:36.590075Z",
+            "name": "Kumush",
+            "unit": "g"
+          },
+          "quantity": "45.000",
+          "created_at": "2025-09-07T17:34:46.654824Z",
+          "updated_at": "2025-09-07T17:34:46.654959Z"
+        },
+        "quantity": "45.000",
+        "transaction": 7
+      }
+    ],
+    "sender": {
+      "id": 2,
+      "created_at": "2025-09-01T15:42:47.969307Z",
+      "updated_at": "2025-09-01T15:42:47.980843Z",
+      "name": "Toshkent Atolye",
+      "type": "atolye"
+    },
+    "receiver": {
+      "id": 1,
+      "created_at": "2025-09-01T15:42:47.969307Z",
+      "updated_at": "2025-09-01T15:42:47.980843Z",
+      "name": "Markaziy Bank",
+      "type": "bank"
+    },
+    "created_at": "2025-09-07T19:12:12.711935Z",
+    "updated_at": "2025-09-07T19:12:12.711970Z",
+    "status": "pending"
   },
-  {
-    id: "T003",
-    from: "Safe",
-    to: "Atolye-3",
-    material: "45 dona Olmos",
-    materialType: "diamond",
-    amount: 45,
-    unit: "dona",
-    status: "pending_sender",
-    senderConfirmed: false,
-    receiverConfirmed: false,
-    createdAt: "2024-01-25 16:00",
-    confirmedAt: null,
-    note: "Buyum yaratish uchun",
-  },
-  {
-    id: "T004",
-    from: "Atolye-2",
-    to: "Safe",
-    material: "160gr Kumush",
-    materialType: "silver",
-    amount: 160,
-    unit: "gr",
-    status: "returned",
-    senderConfirmed: true,
-    receiverConfirmed: true,
-    createdAt: "2024-01-24 18:30",
-    confirmedAt: "2024-01-24 18:45",
-    note: "Ish vaqti tugadi, qaytarildi",
-    processLoss: 20,
-  },
+
 ]
 
+
+
+// status badge function
 const getStatusBadge = (status: string) => {
   switch (status) {
+    case "accepted":
     case "confirmed":
       return (
         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
           <CheckCircle className="h-3 w-3 mr-1" />
-          Yakunlangan
+          Tasdiqlangan
         </Badge>
       )
+    case "pending":
     case "pending_sender":
       return (
         <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
           <Clock className="h-3 w-3 mr-1" />
-          Yuboruvchi kutilmoqda
+          Tasdiqlash kutilmoqda
         </Badge>
       )
     case "pending_receiver":
@@ -113,120 +148,64 @@ const getStatusBadge = (status: string) => {
       return (
         <Badge variant="destructive">
           <XCircle className="h-3 w-3 mr-1" />
-          Bekor qilindi
+          Bekor qilingan
         </Badge>
       )
     default:
-      return <Badge variant="secondary">Noma'lum</Badge>
-  }
-}
-
-const getMaterialIcon = (type: string) => {
-  switch (type) {
-    case "gold":
-      return "🥇"
-    case "silver":
-      return "🥈"
-    case "diamond":
-      return "💎"
-    default:
-      return "📦"
+      return <Badge variant="secondary">Noma’lum</Badge>
   }
 }
 
 export default function TransfersPage() {
+  const [transfers, setTransfers] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
 
+  useEffect(() => {
+    // API dan ma’lumot olish (hozircha mock JSON qo‘yilgan)
+    // fetch("/api/transfers") // ← sizning endpointingiz
+    // .then((res) => res.json())
+    // .then((data) => setTransfers(data))
+    setTransfers(apiData)
+  }, [])
+
   const filteredTransfers = transfers.filter((transfer) => {
     const matchesSearch =
-      transfer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transfer.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transfer.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transfer.material.toLowerCase().includes(searchTerm.toLowerCase())
-
+      transfer.id.toString().includes(searchTerm.toLowerCase()) ||
+      transfer.sender.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transfer.receiver.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || transfer.status === statusFilter
-
     return matchesSearch && matchesStatus
   })
 
-
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString("uz-UZ", { dateStyle: "short", timeStyle: "short" })
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-balance">Transferlar</h1>
+          <h1 className="text-3xl font-bold">Transferlar</h1>
           <p className="text-muted-foreground">Material almashinuvi va transferlarni boshqarish</p>
         </div>
-
         <Button asChild>
-          <Link href="/dashboard/transfers/create">
-            <Plus className="h-4 w-4 mr-2" />
-            Yangi transfer
-          </Link>
+          <Link href="/dashboard/transfers/create">+ Yangi transfer</Link>
         </Button>
-
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Jami transferlar</CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{transfers.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Yakunlangan</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{transfers.filter((t) => t.status === "confirmed").length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Jarayonda</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{transfers.filter((t) => t.status.includes("pending")).length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bekor qilingan</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {transfers.filter((t) => t.status === "cancelled" || t.status === "returned").length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Filters */}
+      {/* Search & Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Transferlar ro'yxati</CardTitle>
-          <CardDescription>Barcha material transferlari va ularning holati</CardDescription>
+          <CardTitle>Transferlar roʻyxati</CardTitle>
+          <CardDescription>API’dan olingan maʼlumotlar</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 mb-6">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Transfer ID, material yoki atolye bo'yicha qidirish..."
+                placeholder="ID, yuboruvchi yoki qabul qiluvchi boʻyicha qidirish..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -234,57 +213,59 @@ export default function TransfersPage() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Holat bo'yicha" />
+                <SelectValue placeholder="Holat bo‘yicha" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Barchasi</SelectItem>
-                <SelectItem value="confirmed">Yakunlangan</SelectItem>
-                <SelectItem value="pending_sender">Yuboruvchi kutilmoqda</SelectItem>
-                <SelectItem value="pending_receiver">Qabul qiluvchi kutilmoqda</SelectItem>
+                <SelectItem value="pending">Kutilmoqda</SelectItem>
+                <SelectItem value="accepted">Tasdiqlangan</SelectItem>
                 <SelectItem value="returned">Qaytarilgan</SelectItem>
-                <SelectItem value="cancelled">Bekor qilindi</SelectItem>
+                <SelectItem value="cancelled">Bekor qilingan</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Table */}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Transfer ID</TableHead>
+                <TableHead>ID</TableHead>
                 <TableHead>Kimdan</TableHead>
                 <TableHead>Kimga</TableHead>
-                <TableHead>Material</TableHead>
+                <TableHead>Materiallar</TableHead>
                 <TableHead>Holat</TableHead>
                 <TableHead>Sana</TableHead>
                 <TableHead>Amallar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransfers.map((transfer) => (
-                <TableRow key={transfer.id}>
-                  <TableCell className="font-mono font-medium">{transfer.id}</TableCell>
-                  <TableCell>{transfer.from}</TableCell>
-                  <TableCell>{transfer.to}</TableCell>
+              {filteredTransfers.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell className="font-mono">#{t.id}</TableCell>
+                  <TableCell>{t.sender.name}</TableCell>
+                  <TableCell>{t.receiver.name}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span>{getMaterialIcon(transfer.materialType)}</span>
-                      <span>{transfer.material}</span>
-                      {transfer.processLoss && (
-                        <Badge variant="outline" className="text-xs">
-                          -{transfer.processLoss}
-                          {transfer.unit} yo'qotish
-                        </Badge>
-                      )}
-                    </div>
+                    <ul className="space-y-1">
+                      {t.items.map((it: any) => (
+                        <li key={it.id} className="text-sm flex justify-between">
+                          <span>{it.inventory.material.name}</span>
+                          <span className="font-mono">
+                            {it.quantity} {it.inventory.material.unit}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </TableCell>
-                  <TableCell>{getStatusBadge(transfer.status)}</TableCell>
-                  <TableCell className="font-mono text-sm">{transfer.createdAt}</TableCell>
+                  <TableCell>{getStatusBadge(t.status)}</TableCell>
+                  <TableCell className="text-sm">{formatDate(t.created_at)}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/dashboard/transfers/${t.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
                       </Button>
-                      {transfer.status.includes("pending") && (
+                      {t.status === "pending" && (
                         <Button variant="outline" size="sm">
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Tasdiqlash
@@ -301,3 +282,6 @@ export default function TransfersPage() {
     </div>
   )
 }
+
+
+

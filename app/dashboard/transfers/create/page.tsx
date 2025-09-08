@@ -169,8 +169,8 @@ export default function CreateTransferPage() {
       <div className="min-h-screen p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-800">Yangi Transfer</h1>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             disabled={!receiver || items.length === 0 || isSubmitting}
             className="text-white"
           >
@@ -267,7 +267,7 @@ export default function CreateTransferPage() {
                   </p>
                 )}
               </div>
-              <div className="flex items-end">
+              <div className="flex items-center">
                 <Button onClick={handleAddItem} className="w-full md:w-auto  text-white">
                   <Plus className="h-4 w-4 mr-2" /> Qo'shish
                 </Button>
@@ -294,9 +294,9 @@ export default function CreateTransferPage() {
                     const remaining = availableQty - transferQty
                     return (
                       <tr key={i} className="border-t border-gray-200 hover:bg-gray-50">
-                        <td className="p-3">{inv?.name ?? "Noma'lum"}</td>
+                        <td className="p-3">{inv?.material.name ?? "Noma'lum"}</td>
                         <td className="p-3 font-medium">{it.quantity}</td>
-                        <td className="p-3">{inv?.unit ?? "-"}</td>
+                        <td className="p-3">{inv?.material.unit ?? "-"}</td>
                         <td className="p-3">{availableQty.toFixed(2)}</td>
                         <td className="p-3">
                           <span className={remaining >= 0 ? "text-green-600" : "text-red-600"}>

@@ -38,6 +38,7 @@ import {
 } from "@/lib/service/materialsApi"
 
 import { useDispatch } from "react-redux"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface Material {
   id: number
@@ -325,73 +326,57 @@ export default function MaterialsPage() {
         </div>
       </div>
 
-      {/* Materials Table */}
       <Card>
         <CardHeader>
           <CardTitle>Materiallar ro'yxati</CardTitle>
           <CardDescription>Jami {materials.length} ta material</CardDescription>
         </CardHeader>
         <CardContent>
-          {materials.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Material topilmadi</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? "Qidiruv bo'yicha natija topilmadi" : "Hozircha materiallar yo'q"}
-              </p>
-              {searchTerm && (
-                <Button variant="outline" onClick={() => setSearchTerm("")}>
-                  Qidiruvni tozalash
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {materials.map((material: Material) => (
-                <div key={material.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-red-600 rounded-full flex items-center justify-center text-white font-semibold">
-                      <Package className="h-5 w-5" />
-                    </div>
-
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">{material.name}</h3>
-                        <Badge className={unitColors[material.unit]}>
-                          {unitLabels[material.unit]} ({material.unit})
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">ID: {material.id}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Yaratilgan: {new Date(material.created_at).toLocaleDateString("uz-UZ")}
-                      </p>
-                    </div>
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditMaterial(material)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Tahrirlash
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(material)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        O'chirish
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>#</TableHead>
+                <TableHead>Nomi</TableHead>
+                <TableHead>O‘lchov birligi</TableHead>
+                <TableHead>Yaratilgan sana</TableHead>
+                <TableHead className="text-right">Amallar</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {materials.map((material, index) => (
+                <TableRow key={material.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell className="font-medium">{material.name}</TableCell>
+                  <TableCell>
+                    <Badge className={unitColors[material.unit]}>
+                      {unitLabels[material.unit]} ({material.unit})
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(material.created_at).toLocaleDateString("uz-UZ")}
+                  </TableCell>
+                  <TableCell className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditMaterial(material)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" /> Tahrirlash
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => confirmDelete(material)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" /> O‘chirish
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </div>
-          )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
-
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">

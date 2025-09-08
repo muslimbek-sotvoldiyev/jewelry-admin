@@ -44,6 +44,7 @@ import Material from "@/types/material"
 import Inventory from "@/types/inventory"
 import Organization from "@/types/organization"
 import { unitColors, unitLabels } from "@/constants/units"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 
 
@@ -106,8 +107,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization_id: Number.parseInt(formData.organization_id), 
-      material_id: Number.parseInt(formData.material_id), 
+      organization_id: Number.parseInt(formData.organization_id),
+      material_id: Number.parseInt(formData.material_id),
     }
 
     try {
@@ -153,8 +154,8 @@ export default function InventoryPage() {
 
     const apiData = {
       quantity: formData.quantity,
-      organization_id: Number.parseInt(formData.organization_id), 
-      material_id: Number.parseInt(formData.material_id), 
+      organization_id: Number.parseInt(formData.organization_id),
+      material_id: Number.parseInt(formData.material_id),
     }
 
     try {
@@ -341,7 +342,6 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Inventory Table */}
       <Card>
         <CardHeader>
           <CardTitle>Inventar ro'yxati</CardTitle>
@@ -362,57 +362,65 @@ export default function InventoryPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
-              {inventory.map((item: Inventory) => {
-                return (
-                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        <Package2 className="h-5 w-5" />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Miqdor</TableHead>
+                  <TableHead>Tashkilot</TableHead>
+                  <TableHead>Yaratilgan sana</TableHead>
+                  <TableHead className="text-right">Amallar</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {inventory.map((item: Inventory) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-mono text-sm">INV-{item.id}</TableCell>
+                    <TableCell className="font-medium">{item.material.name}</TableCell>
+                    <TableCell>
+                      <Badge className={unitColors[item.material.unit]}>
+                        {item.quantity} {unitLabels[item.material.unit]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>{item.organization.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {item.organization.type}
+                        </Badge>
                       </div>
-
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-semibold">{item.material.name}</h3>
-                          <Badge className={unitColors[item.material.unit]}>
-                            {item.quantity} {unitLabels[item.material.unit]}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">{item.organization.name}</p>
-                          <Badge variant="outline" className="text-xs">
-                            {item.organization.type}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">ID: {item.id}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Yaratilgan: {new Date(item.created_at).toLocaleDateString("uz-UZ")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditInventory(item)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Tahrirlash
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(item)}>
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          O'chirish
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )
-              })}
-            </div>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(item.created_at).toLocaleDateString("uz-UZ")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditInventory(item)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Tahrirlash
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => confirmDelete(item)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            O‘chirish
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

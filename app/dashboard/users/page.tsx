@@ -39,6 +39,7 @@ import {
 import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
 
 import { useDispatch } from "react-redux" // Redux dispatch'ni import qiling
+import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table } from "@/components/ui/table"
 
 
 interface User {
@@ -71,8 +72,8 @@ const roleColors = {
 }
 
 export default function UsersPage() {
-    const dispatch = useDispatch() // Redux dispatch'ni olish
-  
+  const dispatch = useDispatch() // Redux dispatch'ni olish
+
   const { data: users = [], isLoading: usersLoading, error: usersError } = useGetUsersQuery(undefined)
   const { data: organizations = [], isLoading: orgsLoading } = useGetOrganizationsQuery({})
   const [addUser] = useAddUsersMutation()
@@ -207,7 +208,7 @@ export default function UsersPage() {
       isStaff: user.is_staff,
     })
     setIsEditDialogOpen(true)
-      dispatch(UsersApi.util.resetApiState());
+    dispatch(UsersApi.util.resetApiState());
 
   }
 
@@ -525,63 +526,72 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>Foydalanuvchilar ro'yxati</CardTitle>
           <CardDescription>Jami {filteredUsers.length} ta foydalanuvchi</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredUsers.map((user: User) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-red-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    {user.first_name.charAt(0)}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold">
-                        {user.first_name} {user.last_name}
-                      </h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>#</TableHead>
+                <TableHead>Foydalanuvchi</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Tashkilot</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Amallar</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user: User, index: number) => (
+                <TableRow key={user.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell className="font-medium">
+                    {user.first_name} {user.last_name} <br />
+                    <span className="text-muted-foreground text-sm">@{user.username}</span>
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{getOrganizationInfo(user.organization)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
                       <Badge variant={user.is_active ? "default" : "secondary"}>
                         {user.is_active ? "Faol" : "Nofaol"}
                       </Badge>
                       {user.is_staff && <Badge variant="outline">Xodim</Badge>}
                     </div>
-                    <p className="text-sm text-muted-foreground">@{user.username}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                    <p className="text-sm text-muted-foreground">{getOrganizationInfo(user.organization)}</p>
-                  </div>
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Tahrirlash
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
-                      {user.is_active ? "Nofaol qilish" : "Faollashtirish"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(user)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      O'chirish
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ))}
-          </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Tahrirlash
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
+                          {user.is_active ? "Nofaol qilish" : "Faollashtirish"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => confirmDelete(user)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          O'chirish
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
-
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
