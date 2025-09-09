@@ -20,10 +20,8 @@ export default function CreateTransferPage() {
   const router = useRouter()
   const currentUser = getCurrentUser()
 
-  console.log("Current User:", currentUser);
-
   const { data: receivers = [] as Organization[], isLoading: receiversLoading } = useGetOrganizationsQuery({})
-  const { data: inventories = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({ organization: 1 })
+  const { data: inventories = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({ organization: currentUser?.organization?.id })
 
 
   const [addTransaction, { isLoading: isSubmitting }] = useAddTransactionMutation()
