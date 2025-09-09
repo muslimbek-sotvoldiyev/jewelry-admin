@@ -18,11 +18,21 @@ import useAuth from "@/hooks/auth"
 import Link from "next/link"
 // import { useGetNotificationsQuery } from "@/lib/api/jewelryApi"
 
- const user = typeof window !== "undefined" 
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
+
+
+  const user = typeof window !== "undefined" 
     ? JSON.parse(localStorage.getItem("user") || "{}") 
     : null
-
   const userType = user?.organization?.type
+
+  
 
   const navigation = [
     { name: "Bosh sahifa", href: "/dashboard", icon: Home, types: ["bank", "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"] },
@@ -39,14 +49,6 @@ import Link from "next/link"
    const filteredNavigation = navigation.filter(
     (item) => !item.types || item.types.includes(userType)
   )
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = usePathname()
 
   useAuth();
 
@@ -70,7 +72,7 @@ export default function DashboardLayout({
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-2">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link

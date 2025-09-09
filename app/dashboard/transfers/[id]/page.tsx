@@ -136,10 +136,12 @@ export default function TransferDetailPage() {
 const user = typeof window !== "undefined"
   ? JSON.parse(localStorage.getItem("user") || "{}")
   : null
-  console.log("shu malumot",transferDetail?.status);
+  console.log("shu malumot",transferDetail?.sender.id, transferDetail?.status);
 
 const isSender = user?.organization?.id === transferDetail?.sender?.id
 const canConfirm = transferDetail?.status === "pending" && !isSender
+console.log("canConfirm: ", canConfirm, isSender);
+
 
 
   if (isLoading) {
