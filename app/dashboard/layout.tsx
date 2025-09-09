@@ -18,17 +18,27 @@ import useAuth from "@/hooks/auth"
 import Link from "next/link"
 // import { useGetNotificationsQuery } from "@/lib/api/jewelryApi"
 
-const navigation = [
-  { name: "Bosh sahifa", href: "/dashboard", icon: Home },
-  { name: "Materiallar", href: "/dashboard/materials", icon: Package },
-  { name: "Inventar", href: "/dashboard/inventory", icon: ShoppingBag },
-  { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory },
-  { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight },
-  // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell },
-  // { name: "Tarix", href: "/dashboard/history", icon: History },
-  { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users },
-  // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings },
-]
+ const user = typeof window !== "undefined" 
+    ? JSON.parse(localStorage.getItem("user") || "{}") 
+    : null
+
+  const userType = user?.organization?.type
+
+  const navigation = [
+    { name: "Bosh sahifa", href: "/dashboard", icon: Home, types: ["bank", "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"] },
+    { name: "Materiallar", href: "/dashboard/materials", icon: Package, types: ["bank"] },
+    { name: "Inventar", href: "/dashboard/inventory", icon: ShoppingBag, types: ["bank",  "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"] },
+    { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory, types: ["bank"] },
+    { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight, types: ["bank",  "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"]  },
+    // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell, types: ["bank"] },
+    // { name: "Tarix", href: "/dashboard/history", icon: History, types: ["bank"] },
+    { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users, types: ["bank"] },
+    // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings, types: ["bank"] },
+  ]
+
+   const filteredNavigation = navigation.filter(
+    (item) => !item.types || item.types.includes(userType)
+  )
 
 export default function DashboardLayout({
   children,

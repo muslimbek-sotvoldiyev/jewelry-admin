@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, CheckCircle, XCircle, Clock, ArrowRight, AlertTriangle, Calendar, User, Building2, University, Loader2 } from "lucide-react"
 import { useState } from "react"
-import { useGetTransactionByIdQuery, useAcceptTransactionMutation, useRejectTransactionMutation } from "@/lib/service/transactionsApi"
+import { useGetTransactionByIdQuery, useAcceptTransactionMutation } from "@/lib/service/transactionsApi"
 import { toast } from "@/hooks/use-toast"
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -82,7 +82,7 @@ export default function TransferDetailPage() {
   const { data: transferDetail, isLoading, error, refetch } = useGetTransactionByIdQuery(transferId)
 
   const [acceptTransaction, { isLoading: isAccepting }] = useAcceptTransactionMutation()
-  const [rejectTransaction, { isLoading: isRejecting }] = useRejectTransactionMutation()
+  // const [rejectTransaction, { isLoading: isRejecting }] = useRejectTransactionMutation()
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
@@ -130,31 +130,17 @@ export default function TransferDetailPage() {
 
     setFormError("")
 
-    try {
-      await rejectTransaction({
-        id: transferId,
-        note: rejectNote,
-      }).unwrap()
-
-      toast({
-        title: "Transfer rad etildi",
-        description: "Transfer muvaffaqiyatli rad etildi.",
-      })
-
-      setIsRejectDialogOpen(false)
-      setRejectNote("")
-      setFormError("")
-      refetch()
-    } catch (err: any) {
-      const errorMessage = err?.data?.message || "Transfer rad etishda xatolik yuz berdi."
-      setFormError(errorMessage)
-      toast({
-        title: "Xatolik!",
-        description: errorMessage,
-        variant: "destructive",
-      })
-    }
   }
+
+  // DashboardLayout yoki TransferDetailPage ichida
+const user = typeof window !== "undefined"
+  ? JSON.parse(localStorage.getItem("user") || "{}")
+  : null
+  console.log("shu malumot",transferDetail?.status);
+
+const isSender = user?.organization?.id === transferDetail?.sender?.id
+const canConfirm = transferDetail?.status === "pending" && !isSender
+
 
   if (isLoading) {
     return (
@@ -232,9 +218,10 @@ export default function TransferDetailPage() {
               </div>
             </div>
 
-            {transferDetail.status === "pending" && (
+            {
+            canConfirm && (
               <div className="flex gap-2">
-                <Button
+                {/* <Button
                   variant="outline"
                   onClick={() => setIsRejectDialogOpen(true)}
                   disabled={isRejecting}
@@ -242,7 +229,7 @@ export default function TransferDetailPage() {
                 >
                   <XCircle className="w-4 h-4 mr-2" />
                   Rad etish
-                </Button>
+                </Button> */}
                 <Button
                   onClick={() => setIsConfirmDialogOpen(true)}
                   disabled={isAccepting}
@@ -403,7 +390,7 @@ export default function TransferDetailPage() {
                 />
               </div>
 
-              <div className="flex gap-3">
+              {/* <div className="flex gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setIsRejectDialogOpen(false)}
@@ -416,7 +403,7 @@ export default function TransferDetailPage() {
                   {isRejecting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                   Rad etish
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
