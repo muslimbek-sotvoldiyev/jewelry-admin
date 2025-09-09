@@ -23,10 +23,13 @@ import Material from "@/types/material"
 import Inventory from "@/types/inventory"
 import Organization from "@/types/organization"
 
+import { getCurrentUser } from "@/lib/auth"
 
 
 export default function InventoryPage() {
   const dispatch = useDispatch()
+
+  const user = getCurrentUser();
 
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [organizationFilter, setOrganizationFilter] = useState<string>("all")
@@ -44,19 +47,11 @@ export default function InventoryPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
 
-  const [formData, setFormData] = useState({
-    quantity: "",
-    organization_id: "",
-    material_id: "",
-  })
+  const [formData, setFormData] = useState({ quantity: "", organization_id: "", material_id: "" })
 
-  const resetForm = () => {
-    setFormData({
-      quantity: "",
-      organization_id: "",
-      material_id: "",
-    })
-  }
+  const resetForm = () => setFormData({ quantity: "", organization_id: "", material_id: "" })
+
+  const isBank = user?.organization.type === "bank";
 
   const getSelectedMaterial = (): Material | undefined => {
     return materials.find((m: Material) => m.id.toString() === formData.material_id)
@@ -233,98 +228,100 @@ export default function InventoryPage() {
           <p className="text-muted-foreground">Material inventarini boshqaring</p>
         </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Yangi inventar
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[400px]">
-            <DialogHeader>
-              <DialogTitle>Yangi inventar yaratish</DialogTitle>
-              <DialogDescription>Tizimga yangi inventar qo'shing</DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="material">Material *</Label>
-                <Select
-                  value={formData.material_id}
-                  onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Materialni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {materials.length === 0 ? (
-                      <SelectItem value="no-materials" disabled>
-                        Material topilmadi
-                      </SelectItem>
-                    ) : (
-                      materials.map((material: Material) => (
-                        <SelectItem key={material.id} value={material.id.toString()}>
-                          {material.name} ({unitLabels[material.unit]})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="organization">Tashkilot *</Label>
-                <Select
-                  value={formData.organization_id}
-                  onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tashkilotni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {organizations.length === 0 ? (
-                      <SelectItem value="no-organizations" disabled>
-                        Tashkilot topilmadi
-                      </SelectItem>
-                    ) : (
-                      organizations.map((org: Organization) => (
-                        <SelectItem key={org.id} value={org.id.toString()}>
-                          {org.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="quantity">{getQuantityLabel()} *</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  step="0.01"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                  placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
-                  disabled={!formData.material_id}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsCreateDialogOpen(false)
-                  resetForm()
-                }}
-              >
-                Bekor qilish
+        {
+          isBank && <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Yangi inventar
               </Button>
-              <Button onClick={handleCreateInventory}>Yaratish</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Yangi inventar yaratish</DialogTitle>
+                <DialogDescription>Tizimga yangi inventar qo'shing</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="material">Material *</Label>
+                  <Select
+                    value={formData.material_id}
+                    onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Materialni tanlang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {materials.length === 0 ? (
+                        <SelectItem value="no-materials" disabled>
+                          Material topilmadi
+                        </SelectItem>
+                      ) : (
+                        materials.map((material: Material) => (
+                          <SelectItem key={material.id} value={material.id.toString()}>
+                            {material.name} ({unitLabels[material.unit]})
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="organization">Tashkilot *</Label>
+                  <Select
+                    value={formData.organization_id}
+                    onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tashkilotni tanlang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizations.length === 0 ? (
+                        <SelectItem value="no-organizations" disabled>
+                          Tashkilot topilmadi
+                        </SelectItem>
+                      ) : (
+                        organizations.map((org: Organization) => (
+                          <SelectItem key={org.id} value={org.id.toString()}>
+                            {org.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="quantity">{getQuantityLabel()} *</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    step="0.01"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                    placeholder={`Masalan: ${getSelectedMaterial()?.unit === "g" ? "100.5" : "10"}`}
+                    disabled={!formData.material_id}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false)
+                    resetForm()
+                  }}
+                >
+                  Bekor qilish
+                </Button>
+                <Button onClick={handleCreateInventory}>Yaratish</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        }
       </div>
 
       {/* Search */}
@@ -339,24 +336,26 @@ export default function InventoryPage() {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Select
-            value={organizationFilter?.toString() ?? ""}
-            onValueChange={(value) => setOrganizationFilter(value)}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Atolye bo‘yicha filterlash" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Barchasi</SelectItem>
-              {organizations.map((organization: Organization) => (
-                <SelectItem key={organization.id} value={organization.id.toString()}>
-                  {organization.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {
+          isBank && <div className="flex items-center space-x-2">
+            <Select
+              value={organizationFilter?.toString() ?? ""}
+              onValueChange={(value) => setOrganizationFilter(value)}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Atolye bo‘yicha filterlash" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Barchasi</SelectItem>
+                {organizations.map((organization: Organization) => (
+                  <SelectItem key={organization.id} value={organization.id.toString()}>
+                    {organization.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        }
       </div>
 
       <Card>

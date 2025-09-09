@@ -153,8 +153,6 @@ export default function TransfersPage() {
                 <SelectItem value="all">Barchasi</SelectItem>
                 <SelectItem value="pending">Kutilmoqda</SelectItem>
                 <SelectItem value="accepted">Tasdiqlangan</SelectItem>
-                <SelectItem value="rejected">Rad etilgan</SelectItem>
-                <SelectItem value="cancelled">Bekor qilingan</SelectItem>
               </SelectContent>
             </Select>
 

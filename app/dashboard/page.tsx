@@ -18,6 +18,7 @@ import {
   Cell,
 } from "recharts"
 import { Gem, Factory, TrendingUp, Clock, AlertTriangle, Plus, Eye, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
 
 // Mock data for charts
 const materialData = [
@@ -81,10 +82,12 @@ export default function DashboardPage() {
             <Eye className="h-4 w-4 mr-2" />
             Hisobot
           </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Yangi transfer
-          </Button>
+          <Link href="/dashboard/transfers/create">
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Yangi transfer
+            </Button>
+          </Link>
         </div>
       </div>
 
