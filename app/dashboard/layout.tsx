@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,46 +16,52 @@ import { useRouter } from "next/navigation"
 import useAuth from "@/hooks/auth"
 
 import Link from "next/link"
-// import { useGetNotificationsQuery } from "@/lib/api/jewelryApi"
+import { getCurrentUser } from "@/lib/auth"
+import { User } from "@/types/user"
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+const navigation = [
+  { name: "Bosh sahifa", href: "/dashboard", icon: Home },
+  { name: "Materiallar", href: "/dashboard/materials", icon: Package, types: ["bank"] },
+  { name: "Inventar", href: "/dashboard/inventory", icon: ShoppingBag },
+  { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory, types: ["bank"] },
+  { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight },
+  // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell, types: ["bank"] },
+  // { name: "Tarix", href: "/dashboard/history", icon: History, types: ["bank"] },
+  { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users, types: ["bank"] },
+  // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings, types: ["bank"] },
+]
+
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
 
+  const unreadCount = 3;
 
-  const user = typeof window !== "undefined" 
-    ? JSON.parse(localStorage.getItem("user") || "{}") 
-    : null
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null);
+
   const userType = user?.organization?.type
 
-  
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, [])
 
-  const navigation = [
-    { name: "Bosh sahifa", href: "/dashboard", icon: Home, types: ["bank", "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"] },
-    { name: "Materiallar", href: "/dashboard/materials", icon: Package, types: ["bank"] },
-    { name: "Inventar", href: "/dashboard/inventory", icon: ShoppingBag, types: ["bank",  "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"] },
-    { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory, types: ["bank"] },
-    { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight, types: ["bank",  "gold_processing","silver_processing", "jewelry_making", "cleaning", "repair"]  },
-    // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell, types: ["bank"] },
-    // { name: "Tarix", href: "/dashboard/history", icon: History, types: ["bank"] },
-    { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users, types: ["bank"] },
-    // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings, types: ["bank"] },
-  ]
-
-   const filteredNavigation = navigation.filter(
-    (item) => !item.types || item.types.includes(userType)
+  const filteredNavigation = navigation.filter(
+    (item) => !item.types || userType && item.types.includes(userType)
   )
 
   useAuth();
 
-  const router = useRouter()
-  // const { data: notifications = [] } = useGetNotificationsQuery()
-  // const unreadCount = notifications.filter((n) => !n.isRead).length
-  const unreadCount = 3 // Mock unread count
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+
+    router.push("/login");
+  }
+
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className={cn("flex flex-col h-full", mobile ? "w-full" : "w-64")}>
@@ -64,9 +70,9 @@ export default function DashboardLayout({
         <div className="p-2 bg-primary/10 rounded-lg">
           <Gem className="h-6 w-6 text-primary" />
         </div>
-        <div>
+        <div >
           <h2 className="font-bold text-lg">Zargarlik</h2>
-          <p className="text-xs text-muted-foreground">Admin Panel</p>
+          <p className="text-xs text-muted-foreground" >{user ? `${user.organization.name}(${user.organization.type})` : "Loading..."} </p>
         </div>
       </div>
 
@@ -99,14 +105,6 @@ export default function DashboardLayout({
       </nav>
     </div>
   )
-
-  const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    localStorage.removeItem("user");
-
-    router.push("/login");
-  }
 
   return (
     <div className="min-h-screen bg-background">
