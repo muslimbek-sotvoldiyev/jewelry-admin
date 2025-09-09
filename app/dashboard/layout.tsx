@@ -67,11 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className={cn("flex flex-col h-full", mobile ? "w-full" : "w-64")}>
       {/* Logo */}
       <div className="flex items-center gap-2 px-6 py-4 border-b">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <Gem className="h-6 w-6 text-primary" />
+        <div className="h-14 w-14">
+        <img src="/logo.jpg" alt="logo" />
+          {/* <Gem className="h-6 w-6 text-primary" /> */}
         </div>
         <div >
-          <h2 className="font-bold text-lg">Zargarlik</h2>
+          <h2 className="font-bold text-lg">FergaGold</h2>
           <p className="text-xs text-muted-foreground" >{user ? `${user.organization.name}(${user.organization.type})` : "Loading..."} </p>
         </div>
       </div>
@@ -162,23 +163,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/admin-avatar.png" alt="Admin" />
-                      <AvatarFallback>AD</AvatarFallback>
+                      {/* <AvatarImage src="/admin-avatar.png" alt="Admin" /> */}
+                      <AvatarFallback>FG</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">Admin</p>
-                      <p className="text-xs leading-none text-muted-foreground">admin@jewelry.com</p>
+                      <p className="text-sm font-medium leading-none">{user?.username || user?.first_name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Sozlamalar</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-red-600 hover:text-red-600" onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4 text-red-600" />

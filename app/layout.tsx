@@ -10,7 +10,7 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "Zargarlik Admin Panel",
   description: "Zargarlik korxonalari uchun boshqaruv tizimi",
-  generator: "v0.app",
+  generator: "fullstackchi",
 }
 
 export default function RootLayout({
