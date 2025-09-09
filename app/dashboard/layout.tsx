@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { use, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -165,8 +165,8 @@ export default function DashboardLayout({
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/admin-avatar.png" alt="Admin" />
-                      <AvatarFallback>AD</AvatarFallback>
+                      {/* <AvatarImage src="/admin-avatar.png" alt="Admin" /> */}
+                      <AvatarFallback>FG</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>

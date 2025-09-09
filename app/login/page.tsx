@@ -71,8 +71,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Gem className="h-8 w-8 text-primary" />
+            <div className="p-1 bg-primary/10 ">
+            <img src="/logo.jpg" alt="logo" className="w-[80px] h-[80px]" />
+
+              {/* <Gem className="h-8 w-8 text-primary" /> */}
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Zargarlik Admin Panel</CardTitle>
