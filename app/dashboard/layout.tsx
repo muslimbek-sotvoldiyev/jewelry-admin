@@ -1,37 +1,33 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Home, Factory, ArrowLeftRight, Bell, History, Settings, Users, Menu, LogOut, Gem } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { Home, Factory, ArrowLeftRight, Bell, History, Settings, Users, Menu, LogOut, Gem, ShoppingBag, Package } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
+import { cn } from "@/lib/utils"
+import { usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
+
 import useAuth from "@/hooks/auth"
+
+import Link from "next/link"
 // import { useGetNotificationsQuery } from "@/lib/api/jewelryApi"
 
 const navigation = [
   { name: "Bosh sahifa", href: "/dashboard", icon: Home },
-  { name: "Materiallar", href: "/dashboard/materials", icon: Home },
-  { name: "Inventar", href: "/dashboard/inventory", icon: Home },
+  { name: "Materiallar", href: "/dashboard/materials", icon: Package },
+  { name: "Inventar", href: "/dashboard/inventory", icon: ShoppingBag },
   { name: "Atolyeler", href: "/dashboard/workshops", icon: Factory },
   { name: "Transferlar", href: "/dashboard/transfers", icon: ArrowLeftRight },
-  { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell },
-  { name: "Tarix", href: "/dashboard/history", icon: History },
+  // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell },
+  // { name: "Tarix", href: "/dashboard/history", icon: History },
   { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users },
-  { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings },
+  // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings },
 ]
 
 export default function DashboardLayout({
@@ -41,8 +37,10 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+
   useAuth();
-  
+
+  const router = useRouter()
   // const { data: notifications = [] } = useGetNotificationsQuery()
   // const unreadCount = notifications.filter((n) => !n.isRead).length
   const unreadCount = 3 // Mock unread count
@@ -89,6 +87,14 @@ export default function DashboardLayout({
       </nav>
     </div>
   )
+
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+
+    router.push("/login");
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,9 +170,9 @@ export default function DashboardLayout({
                     <span>Sozlamalar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Chiqish</span>
+                  <DropdownMenuItem className="text-red-600 hover:text-red-600" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4 text-red-600" />
+                    <span className="">Chiqish</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

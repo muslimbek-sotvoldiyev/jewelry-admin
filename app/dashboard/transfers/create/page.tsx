@@ -14,11 +14,18 @@ import { useAddTransactionMutation } from "@/lib/service/transactionsApi"
 import { toast } from "@/hooks/use-toast"
 import type Organization from "@/types/organization"
 import type Inventory from "@/types/inventory"
+import { getCurrentUser } from "@/lib/auth"
 
 export default function CreateTransferPage() {
   const router = useRouter()
+  const currentUser = getCurrentUser()
+
+  console.log("Current User:", currentUser);
+
   const { data: receivers = [] as Organization[], isLoading: receiversLoading } = useGetOrganizationsQuery({})
-  const { data: inventories = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({})
+  const { data: inventories = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({ organization: 1 })
+
+
   const [addTransaction, { isLoading: isSubmitting }] = useAddTransactionMutation()
 
   const [receiver, setReceiver] = useState("")
@@ -36,7 +43,7 @@ export default function CreateTransferPage() {
   }
 
   // Inventorylarni filterlash - faqat quantity > 0 bo'lganlarini ko'rsatish
-  const availableInventories = inventories.filter((inv) => parseQuantity(inv.quantity) > 0)
+  const availableInventories = inventories.filter((inv: Inventory) => parseQuantity(inv.quantity) > 0)
 
   const isValidQuantity = (quantity: string): boolean => {
     const num = Number.parseFloat(quantity)
@@ -230,8 +237,9 @@ export default function CreateTransferPage() {
                   <SelectContent>
                     {availableInventories.map((inv: Inventory) => {
                       const availableQty = parseQuantity(inv.quantity)
-                      const materialName = inv.material?.name || inv.name
-                      const unit = inv.material?.unit || inv.unit || "g"
+                      const materialName = inv.material.name
+                      const unit = inv.material?.unit || "g"
+
                       return (
                         <SelectItem key={inv.id} value={String(inv.id)}>
                           {materialName} ({availableQty.toFixed(2)} {unit})

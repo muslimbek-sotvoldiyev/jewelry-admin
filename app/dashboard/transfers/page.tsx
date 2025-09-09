@@ -10,6 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye, CheckCircle, Clock, XCircle, ArrowLeftRight, Loader2 } from "lucide-react"
 import { useGetTransactionsQuery } from "@/lib/service/transactionsApi"
+import { getCurrentUser } from "@/lib/auth"
+import Organization from "@/types/organization"
+import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
+import { Transaction } from "@/types/transactions"
 
 // status badge function
 const getStatusBadge = (status: string) => {
@@ -60,24 +64,29 @@ const getStatusBadge = (status: string) => {
 export default function TransfersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [organizationFilter, setOrganizationFilter] = useState("all")
 
-  const {
-    data: transfers = [],
-    isLoading,
-    error,
-    refetch,
-  } = useGetTransactionsQuery({
+  const user = getCurrentUser();
+
+  const { data: transfers = [] as Transaction[], isLoading, error, refetch } = useGetTransactionsQuery({
     search: searchTerm || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
   })
 
-  const filteredTransfers = transfers.filter((transfer: any) => {
-    const matchesSearch =
-      transfer.id.toString().includes(searchTerm.toLowerCase()) ||
+  const { data: organizations = [] } = useGetOrganizationsQuery({})
+
+
+  const filteredTransfers = transfers.filter((transfer: Transaction) => {
+
+    const matchesSearch = transfer.id.toString().includes(searchTerm.toLowerCase()) ||
       transfer.sender.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transfer.receiver.name.toLowerCase().includes(searchTerm.toLowerCase())
+
     const matchesStatus = statusFilter === "all" || transfer.status === statusFilter
-    return matchesSearch && matchesStatus
+
+    const matchesOrganization = organizationFilter === "all" || transfer.receiver.id.toString() === organizationFilter || transfer.sender.id.toString() === organizationFilter
+
+    return matchesSearch && matchesStatus && matchesOrganization
   })
 
   const formatDate = (iso: string) => new Date(iso).toLocaleString("uz-UZ", { dateStyle: "short", timeStyle: "short" })
@@ -146,6 +155,21 @@ export default function TransfersPage() {
                 <SelectItem value="accepted">Tasdiqlangan</SelectItem>
                 <SelectItem value="rejected">Rad etilgan</SelectItem>
                 <SelectItem value="cancelled">Bekor qilingan</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={organizationFilter} onValueChange={setOrganizationFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Holat bo'yicha" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Barchasi</SelectItem>
+
+                {organizations.map((organization: Organization) => (
+                  <SelectItem key={organization.id} value={organization.id.toString()}>
+                    {organization.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

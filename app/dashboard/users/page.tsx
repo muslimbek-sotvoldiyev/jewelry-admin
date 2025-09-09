@@ -2,80 +2,31 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "@/hooks/use-toast"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye, EyeOff, Loader2 } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
-import {
-  useGetUsersQuery,
-  useAddUsersMutation,
-  useUpdateUserMutation,
-  useDeleteUserMutation,
-  UsersApi,
-} from "@/lib/service/usersApi"
+import { useGetUsersQuery, useAddUsersMutation, useUpdateUserMutation, useDeleteUserMutation, UsersApi } from "@/lib/service/usersApi"
 import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
 
-import { useDispatch } from "react-redux" // Redux dispatch'ni import qiling
+import { useDispatch } from "react-redux"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table } from "@/components/ui/table"
+import { User } from "@/types/user"
+import Organization from "@/types/organization"
 
-
-interface User {
-  id: number
-  username: string
-  email: string
-  first_name: string
-  last_name?: string
-  is_active: boolean
-  is_staff: boolean
-  organization: number
-}
-
-interface Organization {
-  id: number
-  name?: string
-  type?: string
-}
-
-const roleLabels = {
-  admin: "Administrator",
-  bank_operator: "Bank Operatori",
-  atolye_operator: "Atolye Operatori",
-}
-
-const roleColors = {
-  admin: "bg-red-100 text-red-800",
-  bank_operator: "bg-blue-100 text-blue-800",
-  atolye_operator: "bg-green-100 text-green-800",
-}
 
 export default function UsersPage() {
-  const dispatch = useDispatch() // Redux dispatch'ni olish
+  const dispatch = useDispatch()
 
   const { data: users = [], isLoading: usersLoading, error: usersError } = useGetUsersQuery(undefined)
   const { data: organizations = [], isLoading: orgsLoading } = useGetOrganizationsQuery({})
+
   const [addUser] = useAddUsersMutation()
   const [updateUser] = useUpdateUserMutation()
   const [deleteUser] = useDeleteUserMutation()
@@ -96,17 +47,15 @@ export default function UsersPage() {
     lastName: "",
     role: "",
     organization: "",
-    isActive: true,
-    isStaff: false,
   })
 
-  const getOrganizationInfo = (orgId: number) => {
-    const org = organizations.find((o: Organization) => o.id === orgId)
-    if (org && org.name && org.type) {
-      return `${org.name} (${org.type})`
-    }
-    return `Tashkilot #${orgId}`
-  }
+  // const getOrganizationInfo = (orgId: number) => {
+  //   const org = organizations.find((o: Organization) => o.id === orgId)
+  //   if (org && org.name && org.type) {
+  //     return `${org.name} (${org.type})`
+  //   }
+  //   return `Tashkilot #${orgId}`
+  // }
 
   const filteredUsers = users.filter(
     (user: User) =>
@@ -114,7 +63,7 @@ export default function UsersPage() {
       user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getOrganizationInfo(user.organization).toLowerCase().includes(searchTerm.toLowerCase()),
+      `${user.organization.name} (${user.organization.type})`.includes(searchTerm.toLowerCase()),
   )
 
   const resetForm = () => {
@@ -127,8 +76,6 @@ export default function UsersPage() {
       lastName: "",
       role: "",
       organization: "",
-      isActive: true,
-      isStaff: false,
     })
   }
 
@@ -168,8 +115,6 @@ export default function UsersPage() {
       email: formData.email,
       first_name: formData.firstName,
       last_name: formData.lastName || "",
-      is_active: formData.isActive,
-      is_staff: formData.isStaff,
       password: formData.password,
       organization: Number.parseInt(formData.organization),
     }
@@ -204,8 +149,6 @@ export default function UsersPage() {
       lastName: user.last_name || "",
       role: "", // Role is not in the API response, so we leave it empty
       organization: user.organization.toString(),
-      isActive: user.is_active,
-      isStaff: user.is_staff,
     })
     setIsEditDialogOpen(true)
     dispatch(UsersApi.util.resetApiState());
@@ -240,8 +183,6 @@ export default function UsersPage() {
       email: formData.email,
       first_name: formData.firstName,
       last_name: formData.lastName || "",
-      is_active: formData.isActive,
-      is_staff: formData.isStaff,
       organization: Number.parseInt(formData.organization),
     }
 
@@ -321,7 +262,7 @@ export default function UsersPage() {
 
   if (usersLoading || orgsLoading) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
           <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
@@ -332,7 +273,7 @@ export default function UsersPage() {
 
   if (usersError) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <p className="text-red-600">Foydalanuvchilarni yuklashda xatolik yuz berdi</p>
         </div>
@@ -341,7 +282,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="px-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Foydalanuvchilar</h1>
@@ -362,6 +303,47 @@ export default function UsersPage() {
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">Ism *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    placeholder="Ism"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Familiya</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    placeholder="Familiya (ixtiyoriy)"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="organization">Tashkilot *</Label>
+                <Select
+                  value={formData.organization}
+                  onValueChange={(value) => setFormData({ ...formData, organization: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tashkilotni tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((org: Organization) => (
+                      <SelectItem key={org.id} value={org.id.toString()}>
+                        {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="username">Foydalanuvchi nomi *</Label>
                 <Input
@@ -427,48 +409,9 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="firstName">Ism *</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    placeholder="Ism"
-                  />
-                </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="lastName">Familiya</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    placeholder="Familiya (ixtiyoriy)"
-                  />
-                </div>
-              </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="organization">Tashkilot *</Label>
-                <Select
-                  value={formData.organization}
-                  onValueChange={(value) => setFormData({ ...formData, organization: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tashkilotni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {organizations.map((org: Organization) => (
-                      <SelectItem key={org.id} value={org.id.toString()}>
-                        {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -494,7 +437,7 @@ export default function UsersPage() {
                     Xodim (is_staff)
                   </Label>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>
@@ -552,7 +495,7 @@ export default function UsersPage() {
                     <span className="text-muted-foreground text-sm">@{user.username}</span>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{getOrganizationInfo(user.organization)}</TableCell>
+                  <TableCell>{`${user.organization.name} (${user.organization.type})`}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Badge variant={user.is_active ? "default" : "secondary"}>
@@ -601,6 +544,48 @@ export default function UsersPage() {
 
           <div className="grid gap-4 py-4">
             {/* Same form fields as create dialog */}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-firstName">Ism *</Label>
+                <Input
+                  id="edit-firstName"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  placeholder="Ism"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="edit-lastName">Familiya</Label>
+                <Input
+                  id="edit-lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  placeholder="Familiya (ixtiyoriy)"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-organization">Tashkilot *</Label>
+              <Select
+                value={formData.organization}
+                onValueChange={(value) => setFormData({ ...formData, organization: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Tashkilotni tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org: Organization) => (
+                    <SelectItem key={org.id} value={org.id.toString()}>
+                      {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="edit-username">Foydalanuvchi nomi *</Label>
               <Input
@@ -667,75 +652,6 @@ export default function UsersPage() {
                 </div>
               </div>
             )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-firstName">Ism *</Label>
-                <Input
-                  id="edit-firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="Ism"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-lastName">Familiya</Label>
-                <Input
-                  id="edit-lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  placeholder="Familiya (ixtiyoriy)"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-organization">Tashkilot *</Label>
-              <Select
-                value={formData.organization}
-                onValueChange={(value) => setFormData({ ...formData, organization: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Tashkilotni tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  {organizations.map((org: Organization) => (
-                    <SelectItem key={org.id} value={org.id.toString()}>
-                      {org.name && org.type ? `${org.name} (${org.type})` : `Tashkilot #${org.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="edit-isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                />
-                <Label htmlFor="edit-isActive" className="text-sm font-medium">
-                  Faol (is_active)
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="edit-isStaff"
-                  checked={formData.isStaff}
-                  onChange={(e) => setFormData({ ...formData, isStaff: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                />
-                <Label htmlFor="edit-isStaff" className="text-sm font-medium">
-                  Xodim (is_staff)
-                </Label>
-              </div>
-            </div>
           </div>
 
           <DialogFooter>

@@ -6,37 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Eye, Edit, Clock, Factory, AlertTriangle, Loader2, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useGetOrganizationsQuery, useAddOrganizationMutation, useDeleteOrganizationMutation, useUpdateOrganizationMutation } from "@/lib/service/atolyeApi"
 import Link from "next/link"
-import {
-  useGetOrganizationsQuery,
-  useAddOrganizationMutation,
-  useDeleteOrganizationMutation,
-  useUpdateOrganizationMutation,
-} from "@/lib/service/atolyeApi"
 
 const getStatusBadge = (status: string) => {
   switch (status) {

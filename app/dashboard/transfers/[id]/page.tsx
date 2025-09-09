@@ -6,25 +6,9 @@ import { useParams, useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Clock,
-  ArrowRight,
-  AlertTriangle,
-  Calendar,
-  User,
-  Building2,
-  University,
-  Loader2,
-} from "lucide-react"
+import { ArrowLeft, CheckCircle, XCircle, Clock, ArrowRight, AlertTriangle, Calendar, User, Building2, University, Loader2 } from "lucide-react"
 import { useState } from "react"
-import {
-  useGetTransactionByIdQuery,
-  useAcceptTransactionMutation,
-  useRejectTransactionMutation,
-} from "@/lib/service/transactionsApi"
+import { useGetTransactionByIdQuery, useAcceptTransactionMutation, useRejectTransactionMutation } from "@/lib/service/transactionsApi"
 import { toast } from "@/hooks/use-toast"
 
 const StatusBadge = ({ status }: { status: string }) => {

@@ -18,7 +18,7 @@ export default function LoginPage() {
   const dispatch = useDispatch()
   const router = useRouter()
   const [login, { isLoading }] = useLoginMutation()
-  
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -52,8 +52,8 @@ export default function LoginPage() {
 
       if (result && result.access) {
         saveToLocalStorage(result)
-        dispatch(authApi.util.resetApiState())
         router.push("/dashboard")
+        dispatch(authApi.util.resetApiState())
       } else {
         setError("Login failed. Please try again.")
       }

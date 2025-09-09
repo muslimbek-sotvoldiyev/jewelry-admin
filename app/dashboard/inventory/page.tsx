@@ -6,59 +6,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package2, Building2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import {
-  useGetInventoryQuery,
-  useAddInventoryMutation,
-  useUpdateInventoryMutation,
-  useDeleteInventoryMutation,
-  InventoryApi,
-} from "@/lib/service/inventoryApi"
+import { useGetInventoryQuery, useAddInventoryMutation, useUpdateInventoryMutation, useDeleteInventoryMutation, InventoryApi } from "@/lib/service/inventoryApi"
 import { useGetMaterialsQuery } from "@/lib/service/materialsApi"
 import { useGetOrganizationsQuery } from "@/lib/service/atolyeApi"
 import { useDispatch } from "react-redux"
+import { unitColors, unitLabels } from "@/constants/units"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 import Material from "@/types/material"
 import Inventory from "@/types/inventory"
 import Organization from "@/types/organization"
-import { unitColors, unitLabels } from "@/constants/units"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 
 
 export default function InventoryPage() {
   const dispatch = useDispatch()
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const {
-    data: inventory = [],
-    isLoading: inventoryLoading,
-    error: inventoryError,
-  } = useGetInventoryQuery({
-    search: searchTerm,
-  })
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [organizationFilter, setOrganizationFilter] = useState<string>("all")
+
+  const { data: inventory = [], isLoading: inventoryLoading, error: inventoryError } = useGetInventoryQuery(undefined)
   const { data: materials = [], isLoading: materialsLoading } = useGetMaterialsQuery(undefined)
   const { data: organizations = [], isLoading: organizationsLoading } = useGetOrganizationsQuery(undefined)
 
@@ -94,6 +67,31 @@ export default function InventoryPage() {
     if (!material) return "Miqdor"
     return `Miqdor (${unitLabels[material.unit]})`
   }
+
+  const filteredInventory = inventory.filter((item: Inventory) => {
+    const search = searchTerm?.toLowerCase() ?? ""
+
+    if (!search && organizationFilter == 'all') return true
+
+    if (organizationFilter != 'all' && !search) {
+      return item.organization.id === +organizationFilter
+    }
+
+    if (search && organizationFilter === 'all') {
+      return (
+        item.material.name.toLowerCase().includes(search) ||
+        item.organization.name.toLowerCase().includes(search) ||
+        item.id.toString().includes(search)
+      )
+    }
+
+    return (
+      (item.material.name.toLowerCase().includes(search) ||
+        item.organization.name.toLowerCase().includes(search) ||
+        item.id.toString().includes(search)) &&
+      item.organization.id === +organizationFilter
+    )
+  })
 
   const handleCreateInventory = async () => {
     if (!formData.quantity || !formData.organization_id || !formData.material_id) {
@@ -205,7 +203,7 @@ export default function InventoryPage() {
 
   if (inventoryLoading || materialsLoading || organizationsLoading) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
           <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
@@ -216,7 +214,7 @@ export default function InventoryPage() {
 
   if (inventoryError) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <p className="text-red-600 mb-4">Inventarni yuklashda xatolik yuz berdi</p>
@@ -228,7 +226,7 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="px-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Inventar</h1>
@@ -340,6 +338,25 @@ export default function InventoryPage() {
             className="pl-8"
           />
         </div>
+
+        <div className="flex items-center space-x-2">
+          <Select
+            value={organizationFilter?.toString() ?? ""}
+            onValueChange={(value) => setOrganizationFilter(value)}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Atolye bo‘yicha filterlash" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Barchasi</SelectItem>
+              {organizations.map((organization: Organization) => (
+                <SelectItem key={organization.id} value={organization.id.toString()}>
+                  {organization.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card>
@@ -374,7 +391,7 @@ export default function InventoryPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inventory.map((item: Inventory) => (
+                {filteredInventory.map((item: Inventory) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-mono text-sm">INV-{item.id}</TableCell>
                     <TableCell className="font-medium">{item.material.name}</TableCell>

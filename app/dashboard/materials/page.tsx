@@ -1,64 +1,24 @@
 "use client"
 
 import { useState } from "react"
+import { useDispatch } from "react-redux"
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import {
-  useGetMaterialsQuery,
-  useAddMaterialMutation,
-  useUpdateMaterialMutation,
-  useDeleteMaterialMutation,
-  MaterialsApi,
-} from "@/lib/service/materialsApi"
-
-import { useDispatch } from "react-redux"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { useGetMaterialsQuery, useAddMaterialMutation, useUpdateMaterialMutation, useDeleteMaterialMutation, MaterialsApi } from "@/lib/service/materialsApi"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-interface Material {
-  id: number
-  name: string
-  unit: "g" | "pcs" | "ct"
-  created_at: string
-  updated_at: string
-}
+import { Search, Plus, Edit, Trash2, Loader2 } from "lucide-react"
+import Material from "@/types/material"
+import { unitColors, unitLabels } from "@/constants/units"
 
-const unitLabels = {
-  g: "Gram",
-  pcs: "Dona",
-  ct: "Karat",
-}
-
-const unitColors = {
-  g: "bg-blue-100 text-blue-800",
-  pcs: "bg-green-100 text-green-800",
-  ct: "bg-purple-100 text-purple-800",
-}
 
 export default function MaterialsPage() {
   const dispatch = useDispatch()
@@ -225,7 +185,7 @@ export default function MaterialsPage() {
 
   if (materialsLoading) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
           <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
@@ -236,7 +196,7 @@ export default function MaterialsPage() {
 
   if (materialsError) {
     return (
-      <div className="px-6 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <p className="text-red-600 mb-4">Materiallarni yuklashda xatolik yuz berdi</p>
@@ -248,7 +208,7 @@ export default function MaterialsPage() {
   }
 
   return (
-    <div className="px-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Materiallar</h1>
