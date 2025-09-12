@@ -29,7 +29,7 @@ const navigation = [
   // { name: "Bildirishnomalar", href: "/dashboard/notifications", icon: Bell, types: ["bank"] },
   // { name: "Tarix", href: "/dashboard/history", icon: History, types: ["bank"] },
   { name: "Foydalanuvchilar", href: "/dashboard/users", icon: Users, types: ["bank"] },
-  { name: "Jarayon", href: "/dashboard/process", icon: Settings },
+  { name: "Jarayon", href: "/dashboard/processes", icon: Settings },
   // { name: "Sozlamalar", href: "/dashboard/settings", icon: Settings, types: ["bank"] },
 ]
 

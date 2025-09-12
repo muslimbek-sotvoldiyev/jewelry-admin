@@ -4,7 +4,7 @@
 export default interface Material {
   id: number
   name: string
-  unit: "g" | "pcs" | "ct"
+  unit: string
   created_at: string
   updated_at: string
 }
