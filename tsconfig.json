@@ -19,10 +19,22 @@
         "name": "next"
       }
     ],
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@components/*": ["src/components/*"],  // src/components papkasi uchun alias
+      "@hooks/*": ["src/hooks/*"],            // src/hooks papkasi uchun alias
+      "@lib/*": ["src/lib/*"],                // src/lib papkasi uchun alias
+      "@types/*": ["src/types/*"]             // src/types papkasi uchun alias
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "lib/store.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "lib/store.js",
+    "src/**/*"  // src papkasidagi barcha fayllarni qo'shish
+  ],
   "exclude": ["node_modules"]
 }
