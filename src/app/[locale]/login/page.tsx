@@ -1,72 +1,62 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Alert, AlertDescription } from "@/src/components/ui/alert"
-import { Lock, User } from "lucide-react"
-import { useRouter } from "@/src/i18n/routing"
-import authApi, { useLoginMutation } from "@/src/lib/service/authApi"
-import { useDispatch } from "react-redux"
-import { useTranslations } from "next-intl"
+import { useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Alert, AlertDescription } from "@/src/components/ui/alert";
+import { Lock, User } from "lucide-react";
+import { useRouter } from "@/src/i18n/routing";
+import authApi, { useLoginMutation } from "@/src/lib/service/authApi";
+import { useDispatch } from "react-redux";
+import { useTranslations } from "next-intl";
 // import api from "@/src/lib/service/api"
 
 export default function LoginPage() {
   const tAuth = useTranslations("Auth");
-  const dispatch = useDispatch()
-  const router = useRouter()
-  const [login, { isLoading }] = useLoginMutation()
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
 
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  })
-  const [error, setError] = useState("")
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const saveToLocalStorage = (data: {
-    access: string
-    refresh: string
-    user: any
-  }) => {
-    localStorage.setItem("access", data.access)
-    localStorage.setItem("refresh", data.refresh)
-    localStorage.setItem("user", JSON.stringify(data.user))
-  }
+  const saveToLocalStorage = (data: { access: string; refresh: string; user: any }) => {
+    localStorage.setItem("access", data.access);
+    localStorage.setItem("refresh", data.refresh);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     try {
-      const result = await login(formData).unwrap()
+      const result = await login(formData).unwrap();
 
       if (result && result.access) {
-        saveToLocalStorage(result)
-        router.push("/dashboard")
-        dispatch(authApi.util.resetApiState())
+        saveToLocalStorage(result);
+        router.push("/dashboard");
+        dispatch(authApi.util.resetApiState());
       } else {
-        setError("Login failed. Please try again.")
+        setError("Login failed. Please try again.");
       }
     } catch (err) {
       if (typeof err === "object" && err !== null && "data" in err) {
-        setError((err.data as any).message || "Noto'g'ri username yoki parol")
+        setError((err.data as any).message || "Noto'g'ri username yoki parol");
       } else {
-        setError("Tizimga kirishda xatolik yuz berdi")
+        setError("Tizimga kirishda xatolik yuz berdi");
       }
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -83,19 +73,20 @@ export default function LoginPage() {
           <CardDescription>{tAuth("loginSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4" autoComplete="off" method="post">
             <div className="space-y-2">
               <Label htmlFor="username">{tAuth("username")}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="username"
+                  name="username"
                   type="text"
                   value={formData.username}
                   onChange={handleChange}
-                  className="pl-10"
-                  required
+                  className="pl-10 placeholder:text-gray-400"
+                  placeholder="abdurazzoq"
                   disabled={isLoading}
+                  required
                 />
               </div>
             </div>
@@ -104,14 +95,14 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="password"
+                  name="password"
                   type="password"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10"
-                  required
+                  className="pl-10 placeholder:text-gray-400"
                   disabled={isLoading}
+                  required
                 />
               </div>
             </div>
@@ -127,5 +118,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -16,18 +16,13 @@ export const metadata: Metadata = {
   generator: "fullstackchi",
 };
 
-export default async function RootLayout(props: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  // ✅ params ni await qilib olish
+export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
 
-  // ✅ getMessages ga locale berish
   const messages = await getMessages({ locale });
 
   return (
