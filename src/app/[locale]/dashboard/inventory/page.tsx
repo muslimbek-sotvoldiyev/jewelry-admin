@@ -1,21 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useTranslations } from "next-intl"
-import { Button } from "@/src/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/src/components/ui/dialog"
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,80 +17,75 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/src/components/ui/alert-dialog"
-import { Badge } from "@/src/components/ui/badge"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu"
-import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package2, Building2 } from "lucide-react"
-import { toast } from "@/src/hooks/use-toast"
+} from "@/src/components/ui/alert-dialog";
+import { Badge } from "@/src/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/src/components/ui/dropdown-menu";
+import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package2, Building2 } from "lucide-react";
+import { toast } from "@/src/hooks/use-toast";
 import {
   useGetInventoryQuery,
   useAddInventoryMutation,
   useUpdateInventoryMutation,
   useDeleteInventoryMutation,
   InventoryApi,
-} from "@/src/lib/service/inventoryApi"
-import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi"
-import { useGetOrganizationsQuery } from "@/src/lib/service/atolyeApi"
-import { useDispatch } from "react-redux"
-import { unitColors, unitLabels } from "@/src/constants/units"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
+} from "@/src/lib/service/inventoryApi";
+import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi";
+import { useGetOrganizationsQuery } from "@/src/lib/service/atolyeApi";
+import { useDispatch } from "react-redux";
+import { unitColors, unitLabels } from "@/src/constants/units";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
 
-import type Material from "@/src/types/material"
-import type Inventory from "@/src/types/inventory"
-import type Organization from "@/src/types/organization"
+import type Material from "@/src/types/material";
+import type Inventory from "@/src/types/inventory";
+import type Organization from "@/src/types/organization";
 
-import { getCurrentUser } from "@/src/lib/auth"
+import { getCurrentUser } from "@/src/lib/auth";
 
 export default function InventoryPage() {
-  const t = useTranslations("inventory")
-  const dispatch = useDispatch()
+  const t = useTranslations("inventory");
+  const dispatch = useDispatch();
 
-  const user = getCurrentUser()
+  const user = getCurrentUser();
 
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [organizationFilter, setOrganizationFilter] = useState<string>("all")
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [organizationFilter, setOrganizationFilter] = useState<string>("all");
 
-  const { data: inventory = [], isLoading: inventoryLoading, error: inventoryError } = useGetInventoryQuery(undefined)
-  const { data: materials = [], isLoading: materialsLoading } = useGetMaterialsQuery(undefined)
-  const { data: organizations = [], isLoading: organizationsLoading } = useGetOrganizationsQuery(undefined)
+  const { data: inventory = [], isLoading: inventoryLoading, error: inventoryError } = useGetInventoryQuery(undefined);
+  const { data: materials = [], isLoading: materialsLoading } = useGetMaterialsQuery(undefined);
+  const { data: organizations = [], isLoading: organizationsLoading } = useGetOrganizationsQuery(undefined);
 
-  const [addInventory] = useAddInventoryMutation()
-  const [updateInventory] = useUpdateInventoryMutation()
-  const [deleteInventory] = useDeleteInventoryMutation()
+  const [addInventory] = useAddInventoryMutation();
+  const [updateInventory] = useUpdateInventoryMutation();
+  const [deleteInventory] = useDeleteInventoryMutation();
 
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null);
 
-  const [formData, setFormData] = useState({ quantity: "", organization_id: "", material_id: "" })
+  const [formData, setFormData] = useState({ quantity: "", organization_id: "", material_id: "" });
 
-  const resetForm = () => setFormData({ quantity: "", organization_id: "", material_id: "" })
+  const resetForm = () => setFormData({ quantity: "", organization_id: "", material_id: "" });
 
-  const isBank = user?.organization.type === "bank"
+  const isBank = user?.organization.type === "bank";
 
   const getSelectedMaterial = (): Material | undefined => {
-    return materials.find((m: Material) => m.id.toString() === formData.material_id)
-  }
+    return materials.find((m: Material) => m.id.toString() === formData.material_id);
+  };
 
   const getQuantityLabel = () => {
-    const material = getSelectedMaterial()
-    if (!material) return t("form.quantity")
-    return `${t("form.quantity")} (${unitLabels[material.unit]})`
-  }
+    const material = getSelectedMaterial();
+    if (!material) return t("form.quantity");
+    return `${t("form.quantity")} (${unitLabels[material.unit]})`;
+  };
 
   const filteredInventory = inventory.filter((item: Inventory) => {
-    const search = searchTerm?.toLowerCase() ?? ""
+    const search = searchTerm?.toLowerCase() ?? "";
 
-    if (!search && organizationFilter == "all") return true
+    if (!search && organizationFilter == "all") return true;
 
     if (organizationFilter != "all" && !search) {
-      return item.organization.id === +organizationFilter
+      return item.organization.id === +organizationFilter;
     }
 
     if (search && organizationFilter === "all") {
@@ -106,7 +93,7 @@ export default function InventoryPage() {
         item.material.name.toLowerCase().includes(search) ||
         item.organization.name.toLowerCase().includes(search) ||
         item.id.toString().includes(search)
-      )
+      );
     }
 
     return (
@@ -114,8 +101,8 @@ export default function InventoryPage() {
         item.organization.name.toLowerCase().includes(search) ||
         item.id.toString().includes(search)) &&
       item.organization.id === +organizationFilter
-    )
-  })
+    );
+  });
 
   const handleCreateInventory = async () => {
     if (!formData.quantity || !formData.organization_id || !formData.material_id) {
@@ -123,107 +110,107 @@ export default function InventoryPage() {
         title: t("common.error"),
         description: t("validation.allFieldsRequired"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     const apiData = {
       quantity: formData.quantity,
       organization_id: Number.parseInt(formData.organization_id),
       material_id: Number.parseInt(formData.material_id),
-    }
+    };
 
     try {
-      await addInventory(apiData).unwrap()
-      resetForm()
-      setIsCreateDialogOpen(false)
+      await addInventory(apiData).unwrap();
+      resetForm();
+      setIsCreateDialogOpen(false);
 
       toast({
         title: t("common.success"),
         description: t("messages.created"),
-      })
-      dispatch(InventoryApi.util.resetApiState())
+      });
+      dispatch(InventoryApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("common.error"),
         description: t("messages.createError"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleEditInventory = (inventoryItem: Inventory) => {
-    setSelectedInventory(inventoryItem)
+    setSelectedInventory(inventoryItem);
     setFormData({
       quantity: inventoryItem.quantity,
       organization_id: inventoryItem.organization.id.toString(),
       material_id: inventoryItem.material.id.toString(),
-    })
-    setIsEditDialogOpen(true)
-  }
+    });
+    setIsEditDialogOpen(true);
+  };
 
   const handleUpdateInventory = async () => {
-    if (!selectedInventory) return
+    if (!selectedInventory) return;
 
     if (!formData.quantity || !formData.organization_id || !formData.material_id) {
       toast({
         title: t("common.error"),
         description: t("validation.allFieldsRequired"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     const apiData = {
       quantity: formData.quantity,
       organization_id: Number.parseInt(formData.organization_id),
       material_id: Number.parseInt(formData.material_id),
-    }
+    };
 
     try {
-      await updateInventory({ id: selectedInventory.id, ...apiData }).unwrap()
-      resetForm()
-      setIsEditDialogOpen(false)
-      setSelectedInventory(null)
+      await updateInventory({ id: selectedInventory.id, ...apiData }).unwrap();
+      resetForm();
+      setIsEditDialogOpen(false);
+      setSelectedInventory(null);
 
       toast({
         title: t("common.success"),
         description: t("messages.updated"),
-      })
-      dispatch(InventoryApi.util.resetApiState())
+      });
+      dispatch(InventoryApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("common.error"),
         description: t("messages.updateError"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleDeleteInventory = async (inventoryId: number) => {
     try {
-      await deleteInventory(inventoryId).unwrap()
-      setIsDeleteDialogOpen(false)
-      setSelectedInventory(null)
+      await deleteInventory(inventoryId).unwrap();
+      setIsDeleteDialogOpen(false);
+      setSelectedInventory(null);
 
       toast({
         title: t("common.success"),
         description: t("messages.deleted"),
-      })
-      dispatch(InventoryApi.util.resetApiState())
+      });
+      dispatch(InventoryApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("common.error"),
         description: t("messages.deleteError"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const confirmDelete = (inventoryItem: Inventory) => {
-    setSelectedInventory(inventoryItem)
-    setIsDeleteDialogOpen(true)
-  }
+    setSelectedInventory(inventoryItem);
+    setIsDeleteDialogOpen(true);
+  };
 
   if (inventoryLoading || materialsLoading || organizationsLoading) {
     return (
@@ -233,7 +220,7 @@ export default function InventoryPage() {
           <span className="ml-2">{t("common.loading")}</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (inventoryError) {
@@ -246,7 +233,7 @@ export default function InventoryPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -274,10 +261,7 @@ export default function InventoryPage() {
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="material">{t("form.material")} *</Label>
-                  <Select
-                    value={formData.material_id}
-                    onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
-                  >
+                  <Select value={formData.material_id} onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("form.selectMaterial")} />
                     </SelectTrigger>
@@ -299,10 +283,7 @@ export default function InventoryPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="organization">{t("form.organization")} *</Label>
-                  <Select
-                    value={formData.organization_id}
-                    onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
-                  >
+                  <Select value={formData.organization_id} onValueChange={(value) => setFormData({ ...formData, organization_id: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("form.selectOrganization")} />
                     </SelectTrigger>
@@ -340,8 +321,8 @@ export default function InventoryPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setIsCreateDialogOpen(false)
-                    resetForm()
+                    setIsCreateDialogOpen(false);
+                    resetForm();
                   }}
                 >
                   {t("common.cancel")}
@@ -357,20 +338,12 @@ export default function InventoryPage() {
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("search.placeholder")}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
+          <Input placeholder={t("search.placeholder")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8" />
         </div>
 
         {isBank && (
           <div className="flex items-center space-x-2">
-            <Select
-              value={organizationFilter?.toString() ?? ""}
-              onValueChange={(value) => setOrganizationFilter(value)}
-            >
+            <Select value={organizationFilter?.toString() ?? ""} onValueChange={(value) => setOrganizationFilter(value)}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder={t("filters.byOrganization")} />
               </SelectTrigger>
@@ -397,9 +370,7 @@ export default function InventoryPage() {
             <div className="text-center py-12">
               <Package2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">{t("empty.title")}</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? t("empty.noResults") : t("empty.noData")}
-              </p>
+              <p className="text-muted-foreground mb-4">{searchTerm ? t("empty.noResults") : t("empty.noData")}</p>
               {searchTerm && (
                 <Button variant="outline" onClick={() => setSearchTerm("")}>
                   {t("empty.clearSearch")}
@@ -476,10 +447,7 @@ export default function InventoryPage() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="edit-material">{t("form.material")} *</Label>
-              <Select
-                value={formData.material_id}
-                onValueChange={(value) => setFormData({ ...formData, material_id: value })}
-              >
+              <Select value={formData.material_id} onValueChange={(value) => setFormData({ ...formData, material_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("form.selectMaterial")} />
                 </SelectTrigger>
@@ -495,10 +463,7 @@ export default function InventoryPage() {
 
             <div className="grid gap-2">
               <Label htmlFor="edit-organization">{t("form.organization")} *</Label>
-              <Select
-                value={formData.organization_id}
-                onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
-              >
+              <Select value={formData.organization_id} onValueChange={(value) => setFormData({ ...formData, organization_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("form.selectOrganization")} />
                 </SelectTrigger>
@@ -529,9 +494,9 @@ export default function InventoryPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setIsEditDialogOpen(false)
-                resetForm()
-                setSelectedInventory(null)
+                setIsEditDialogOpen(false);
+                resetForm();
+                setSelectedInventory(null);
               }}
             >
               {t("common.cancel")}
@@ -560,5 +525,5 @@ export default function InventoryPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

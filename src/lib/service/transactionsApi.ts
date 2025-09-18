@@ -1,6 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { baseQuery } from "@/src/lib/service/api"
+import { baseQuery } from "@/src/lib/service/api";
 
 export const TransactionsApi = createApi({
   reducerPath: "transactions",
@@ -9,18 +9,17 @@ export const TransactionsApi = createApi({
   endpoints: (builder) => ({
     GetTransactions: builder.query({
       query: (params = {}) => {
-        const searchParams = new URLSearchParams()
-        if (params.search) {
-          searchParams.append("search", params.search)
+        const searchParams = new URLSearchParams();
+
+        for (const key of Object.keys(params)) {
+          if (params[key]) {
+            searchParams.append(key, params[key]);
+          }
         }
-        if (params.ordering) {
-          searchParams.append("ordering", params.ordering)
-        }
-        if (params.status) {
-          searchParams.append("status", params.status)
-        }
-        const queryString = searchParams.toString()
-        return `/transactions/list/${queryString ? `?${queryString}` : ""}`
+
+        const queryString = searchParams.toString();
+
+        return `/transactions/list/${queryString ? `?${queryString}` : ""}`;
       },
       providesTags: ["Transactions"],
     }),
@@ -51,11 +50,11 @@ export const TransactionsApi = createApi({
       invalidatesTags: (result, error, { id }) => ["Transactions", { type: "Transactions", id }],
     }),
   }),
-})
+});
 
 export const {
   useGetTransactionsQuery,
   useGetTransactionByIdQuery,
   useAddTransactionMutation,
   useAcceptTransactionMutation,
-} = TransactionsApi
+} = TransactionsApi;

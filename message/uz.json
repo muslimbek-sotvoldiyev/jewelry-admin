@@ -759,6 +759,7 @@
       "title": "Atolyeler ro'yxati",
       "description": "Barcha atolyeler va ularning hozirgi holati",
       "headers": {
+        "id": "ID",
         "workshop": "Atolye",
         "owner": "Egasi",
         "status": "Holat",
@@ -829,7 +830,9 @@
       "goBack": "Orqaga qaytish",
       "changeStatus": "Holatni o'zgartirish",
       "change": "O'zgartirish",
-      "tryAgain": "Qayta urinish"
+      "tryAgain": "Qayta urinish",
+      "cancel": "Bekor qilish",
+      "delete": "O'chirish"
     },
     "status": {
       "active": "Faol",
@@ -877,6 +880,18 @@
       "changeStatus": {
         "title": "Atolye holatini o'zgartirish",
         "description": "{name} uchun yangi holat tanlang"
+      },
+      "create": {
+        "title": "Yangi atolye yaratish",
+        "description": "Yangi atolye uchun asosiy ma'lumotlarni kiriting."
+      },
+      "edit": {
+        "title": "Atolyeni tahrirlash",
+        "description": "Atolye ma'lumotlarini yangilang."
+      },
+      "delete": {
+        "title": "Atolyeni o'chirish",
+        "description": "Haqiqatan ham \"{name}\" atolyesini o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi."
       }
     },
     "form": {
@@ -897,6 +912,28 @@
     "success": {
       "title": "Muvaffaqiyat",
       "statusChanged": "Atolye holati o'zgartirildi"
+    },
+    "filters": {
+      "today": "Bugun",
+      "7days": "7 kun",
+      "30days": "30 kun",
+      "all": "Barchasi"
+    },
+    "charts": {
+      "received": "Qabul qilingan",
+      "sent": "Chiqarilgan",
+      "generalTitle": "Kirim va chiqim",
+      "generalDescription": "Tanlangan muddat davomidagi almashilgan mahsulotlar",
+      "materialTitle": "Mahsulotlar",
+      "materialDescription": "Tanlangan muddat davomidagi almashilgan mahsulotlar"
+    },
+    "transactions": {
+      "title": "Transferlar",
+      "description":"Tanlangan muddat davomidagi transferlar",
+      "date": "Sana",
+      "material": "Material",
+      "action": "Harakat",
+      "note":"Izoh (ixtiyoriy)"
     }
   }
 }

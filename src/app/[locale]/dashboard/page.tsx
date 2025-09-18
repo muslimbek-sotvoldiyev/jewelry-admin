@@ -10,7 +10,6 @@ import { Button } from "@/src/components/ui/button";
 import { Link } from "@/src/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useGetStatsQuery } from "@/src/lib/service/dashboard";
-import { DashboardStats } from "@/src/types/dashboard";
 import { Skeleton } from "@/src/components/ui/skeleton";
 
 const recentActivities = [

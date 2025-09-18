@@ -1,7 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { baseQuery } from "@/src/lib/service/api"
-
+import { baseQuery } from "@/src/lib/service/api";
 
 export const AtolyeApi = createApi({
   reducerPath: "AtolyeApi",
@@ -16,6 +15,23 @@ export const AtolyeApi = createApi({
     getOrganizationById: builder.query({
       query: (id) => `/organizations/${id}/`,
       providesTags: (result, error, id) => [{ type: "Organization", id }],
+    }),
+
+    getOrganizationTransactions: builder.query({
+      query: ({ id, ...params }) => {
+        const searchParams = new URLSearchParams();
+
+        for (const key of Object.keys(params)) {
+          if (params[key]) {
+            searchParams.append(key, params[key]);
+          }
+        }
+
+        const queryString = searchParams.toString();
+
+        return `/organizations/${id}/transactions/${queryString ? `?${queryString}` : ``}`;
+      },
+      // providesTags: (result, error, id) => [{ type: "OrganizationTransactions", id }],
     }),
 
     addOrganization: builder.mutation({
@@ -44,7 +60,7 @@ export const AtolyeApi = createApi({
       invalidatesTags: ["Organization"],
     }),
   }),
-})
+});
 
 export const {
   useGetOrganizationsQuery,
@@ -52,4 +68,5 @@ export const {
   useAddOrganizationMutation,
   useUpdateOrganizationMutation,
   useDeleteOrganizationMutation,
-} = AtolyeApi
+  useGetOrganizationTransactionsQuery,
+} = AtolyeApi;

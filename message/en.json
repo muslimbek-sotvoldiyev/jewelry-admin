@@ -759,12 +759,8 @@
       "title": "Atolyeler ro'yxati",
       "description": "Barcha atolyeler va ularning hozirgi holati",
       "headers": {
+        "id": "ID",
         "workshop": "Atolye",
-        "owner": "Egasi",
-        "status": "Holat",
-        "currentMaterial": "Hozirgi material",
-        "workTime": "Ish vaqti",
-        "process": "Jarayon",
         "actions": "Amallar"
       }
     },
