@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useTranslations } from "next-intl"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
-import { Button } from "@/src/components/ui/button"
-import { Avatar, AvatarFallback } from "@/src/components/ui/avatar"
+import { Button } from "@/src/components/ui/button";
+import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,34 +13,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet"
-import { Home, Factory, ArrowLeftRight, Bell, Settings, Users, Menu, LogOut, ShoppingBag, Package } from "lucide-react"
-import { Toaster } from "@/src/components/ui/toaster"
-import { cn } from "@/src/lib/utils"
-import { usePathname } from "@/src/i18n/routing"
-import { useRouter } from "@/src/i18n/routing"
-import { LanguageSwitcher } from "@/src/components/language-switcher"
+} from "@/src/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
+import { Home, Factory, ArrowLeftRight, Bell, Settings, Users, Menu, LogOut, ShoppingBag, Package } from "lucide-react";
+import { Toaster } from "@/src/components/ui/toaster";
+import { cn } from "@/src/lib/utils";
+import { usePathname } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
+import { LanguageSwitcher } from "@/src/components/language-switcher";
 
-import useAuth from "@/src/hooks/auth"
+import useAuth from "@/src/hooks/auth";
 
-import { Link } from "@/src/i18n/routing"
-import { getCurrentUser } from "@/src/lib/auth"
-import type { User } from "@/src/types/user"
+import { Link } from "@/src/i18n/routing";
+import { getCurrentUser } from "@/src/lib/auth";
+import type { User } from "@/src/types/user";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const t = useTranslations("Navigation")
-  const tAuth = useTranslations("Auth")
-  const tCommon = useTranslations("Common")
+  const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations("Navigation");
+  const tAuth = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
 
-  const unreadCount = 3
+  const unreadCount = 3;
 
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
-  const userType = user?.organization?.type
+  const userType = user?.organization?.type;
 
   const navigation = [
     { name: t("dashboard"), href: "/dashboard", icon: Home },
@@ -53,23 +53,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: t("users"), href: "/dashboard/users", icon: Users, types: ["bank"] },
     { name: t("processes"), href: "/dashboard/processes", icon: Settings },
     // { name: t('settings'), href: "/dashboard/settings", icon: Settings, types: ["bank"] },
-  ]
+  ];
 
   useEffect(() => {
-    setUser(getCurrentUser())
-  }, [])
+    setUser(getCurrentUser());
+  }, []);
 
-  const filteredNavigation = navigation.filter((item) => !item.types || (userType && item.types.includes(userType)))
+  const filteredNavigation = navigation.filter((item) => !item.types || (userType && item.types.includes(userType)));
 
-  useAuth()
+  useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("access")
-    localStorage.removeItem("refresh")
-    localStorage.removeItem("user")
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
 
-    router.push("/login")
-  }
+    router.push("/login");
+  };
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className={cn("flex flex-col h-full", mobile ? "w-full" : "w-64")}>
@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-2">
         {filteredNavigation.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
               onClick={() => mobile && setSidebarOpen(false)}
             >
@@ -111,11 +111,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </span>
               )}
             </Link>
-          )
+          );
         })}
       </nav>
     </div>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -209,5 +209,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <Toaster />
     </div>
-  )
+  );
 }

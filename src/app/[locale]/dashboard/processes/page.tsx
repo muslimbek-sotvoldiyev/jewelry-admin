@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useTranslations } from "next-intl"
-import { Link } from "@/src/i18n/routing"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Button } from "@/src/components/ui/button"
-import { Badge } from "@/src/components/ui/badge"
-import { Input } from "@/src/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Search, Eye, CheckCircle, Clock, XCircle, Settings, Loader2 } from "lucide-react"
-import { useGetProcessesQuery } from "@/src/lib/service/processApi"
-import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi"
-import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi"
-import { getCurrentUser } from "@/src/lib/auth"
-import type { Process } from "@/src/types/process"
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/routing";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import { Input } from "@/src/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Search, Eye, CheckCircle, Clock, XCircle, Settings, Loader2, SquareCheckBig, Trash2 } from "lucide-react";
+import { useGetProcessesQuery } from "@/src/lib/service/processApi";
+import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi";
+import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi";
+import { getCurrentUser } from "@/src/lib/auth";
+import type { Process } from "@/src/types/process";
 
 export default function ProcessesPage() {
-  const t = useTranslations("processes")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const t = useTranslations("processes");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const user = getCurrentUser()
+  const user = getCurrentUser();
 
   const {
     data: processes = [],
@@ -31,12 +31,14 @@ export default function ProcessesPage() {
   } = useGetProcessesQuery({
     search: searchTerm || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
-  })
+  });
 
-  const { data: inventory = [] } = useGetInventoryQuery({})
-  const { data: materials = [] } = useGetMaterialsQuery({})
+  const { data: inventory = [] } = useGetInventoryQuery({});
+  const { data: materials = [] } = useGetMaterialsQuery({});
 
   const getStatusBadge = (status: string) => {
+    console.log(status);
+
     switch (status) {
       case "completed":
         return (
@@ -44,54 +46,38 @@ export default function ProcessesPage() {
             <CheckCircle className="h-3 w-3 mr-1" />
             {t("status.completed")}
           </Badge>
-        )
-      case "in_progress":
+        );
+      case "in process":
         return (
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
             <Settings className="h-3 w-3 mr-1" />
             {t("status.inProgress")}
           </Badge>
-        )
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            <Clock className="h-3 w-3 mr-1" />
-            {t("status.pending")}
-          </Badge>
-        )
-      case "cancelled":
-        return (
-          <Badge variant="destructive">
-            <XCircle className="h-3 w-3 mr-1" />
-            {t("status.cancelled")}
-          </Badge>
-        )
-      default:
-        return <Badge variant="secondary">{t("status.unknown")}</Badge>
+        );
     }
-  }
+  };
 
   // Helper function to get inventory item by id
   const getInventoryById = (id: number) => {
-    return inventory.find((inv) => inv.id === id)
-  }
+    return inventory.find((inv) => inv.id === id);
+  };
 
   // Helper function to get material by id
   const getMaterialById = (id: number) => {
-    return materials.find((mat) => mat.id === id)
-  }
+    return materials.find((mat) => mat.id === id);
+  };
 
   const filteredProcesses = processes.filter((process: Process) => {
     const matchesSearch =
       process.id.toString().includes(searchTerm.toLowerCase()) ||
-      process.organization.name.toLowerCase().includes(searchTerm.toLowerCase())
+      process.organization.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || process.status === statusFilter
+    const matchesStatus = statusFilter === "all" || process.status === statusFilter;
 
-    return matchesSearch && matchesStatus
-  })
+    return matchesSearch && matchesStatus;
+  });
 
-  const formatDate = (iso: string) => new Date(iso).toLocaleString("uz-UZ", { dateStyle: "short", timeStyle: "short" })
+  const formatDate = (iso: string) => new Date(iso).toLocaleString("uz-UZ", { dateStyle: "short", timeStyle: "short" });
 
   if (error) {
     return (
@@ -114,7 +100,7 @@ export default function ProcessesPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -191,7 +177,7 @@ export default function ProcessesPage() {
                         {process.inputs && process.inputs.length > 0 ? (
                           <ul className="space-y-1">
                             {process.inputs.map((input, index) => {
-                              const inventoryItem = getInventoryById(input.inventory)
+                              const inventoryItem = getInventoryById(input.inventory);
                               return (
                                 <li key={index} className="text-sm flex justify-between">
                                   <span>{inventoryItem?.material.name || t("unknown")}</span>
@@ -199,7 +185,7 @@ export default function ProcessesPage() {
                                     {input.quantity} {inventoryItem?.material.unit || ""}
                                   </span>
                                 </li>
-                              )
+                              );
                             })}
                           </ul>
                         ) : (
@@ -210,7 +196,7 @@ export default function ProcessesPage() {
                         {process.outputs && process.outputs.length > 0 ? (
                           <ul className="space-y-1">
                             {process.outputs.map((output) => {
-                              const material = getMaterialById(output.material)
+                              const material = getMaterialById(output.material);
                               return (
                                 <li key={output.id} className="text-sm flex justify-between">
                                   <span>{material?.name || t("unknown")}</span>
@@ -218,7 +204,7 @@ export default function ProcessesPage() {
                                     {output.quantity} {material?.unit || ""}
                                   </span>
                                 </li>
-                              )
+                              );
                             })}
                           </ul>
                         ) : (
@@ -228,13 +214,16 @@ export default function ProcessesPage() {
                       <TableCell>{getStatusBadge(process.status)}</TableCell>
                       <TableCell className="text-sm">{formatDate(process.created_at)}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/dashboard/processes/${process.id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
+                        {process.status == "in process" && (
+                          <div className="flex gap-2">
+                            <Button className="cursor-pointer" variant="ghost" size="sm">
+                              <SquareCheckBig className="h-4 w-4" />
+                            </Button>
+                            <Button className="cursor-pointer" variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -253,5 +242,5 @@ export default function ProcessesPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
