@@ -816,83 +816,72 @@
       "workshopDeleted": "Atolye o'chirildi"
     }
   },
-  "WorkshopDetailPage": {
-    "header": {
-      "description": "Atolye tafsilotlari va faollik tarixi"
-    },
-    "buttons": {
-      "back": "Orqaga",
-      "goBack": "Orqaga qaytish",
-      "changeStatus": "Holatni o'zgartirish",
-      "change": "O'zgartirish",
-      "tryAgain": "Qayta urinish"
-    },
-    "status": {
-      "active": "Faol",
-      "busy": "Band",
-      "stopped": "To'xtatilgan",
-      "unknown": "Noma'lum"
-    },
-    "actions": {
-      "received": "Qabul",
-      "sent": "Yuborish",
-      "processed": "Qayta ishlash"
-    },
-    "sections": {
-      "basicInfo": {
-        "title": "Asosiy ma'lumotlar",
-        "owner": "Egasi",
-        "email": "Email",
-        "phone": "Telefon",
-        "created": "Yaratilgan"
-      },
-      "currentStatus": {
-        "title": "Hozirgi holat",
-        "status": "Holat",
-        "currentMaterial": "Hozirgi material",
-        "process": "Jarayon",
-        "workTime": "Ish vaqti",
-        "totalWorkTime": "Jami ish vaqti",
-        "completedJobs": "Bajarilgan ishlar"
-      },
-      "materialHistory": {
-        "title": "Material tarixi",
-        "description": "So'nggi material harakatlari va qayta ishlash tarixi",
-        "headers": {
-          "date": "Sana",
-          "action": "Harakat",
-          "material": "Material",
-          "destination": "Manzil",
-          "note": "Izoh"
-        },
-        "from": "dan",
-        "to": "ga"
+ "WorkshopDetailPage": {
+  "header": {
+    "description": "Workshop details and activity history"
+  },
+  "buttons": {
+    "back": "Back",
+    "goBack": "Go back",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "tryAgain": "Try again"
+  },
+  "status": {
+    "active": "Active",
+    "busy": "Busy",
+    "stopped": "Stopped",
+    "unknown": "Unknown"
+  },
+  "actions": {
+    "received": "Received",
+    "sent": "Sent",
+    "processed": "Processed"
+  },
+  "materials": {
+    "gold": "Gold",
+    "silver": "Silver"
+  },
+  "filters": {
+    "today": "Today",
+    "7days": "7 Days",
+    "30days": "30 Days",
+    "all": "All"
+  },
+  "charts": {
+    "generalTitle": "General Statistics",
+    "generalDescription": "Quantities of materials sent and received",
+    "materialTitle": "Material Distribution",
+    "materialDescription": "Types of materials processed",
+    "received": "Received",
+    "sent": "Sent"
+  },
+  "sections": {
+    "materialHistory": {
+      "title": "Material History",
+      "description": "Recent material movements and processing history",
+      "processNote": "20g loss during cleaning process",
+      "headers": {
+        "date": "Date",
+        "action": "Action",
+        "material": "Material",
+        "note": "Note"
       }
-    },
-    "dialogs": {
-      "changeStatus": {
-        "title": "Atolye holatini o'zgartirish",
-        "description": "{name} uchun yangi holat tanlang"
-      }
-    },
-    "form": {
-      "newStatus": "Yangi holat",
-      "selectStatus": "Holatni tanlang",
-      "note": "Izoh (ixtiyoriy)",
-      "notePlaceholder": "Holat o'zgarishi sababi..."
-    },
-    "loading": {
-      "text": "Ma'lumotlar yuklanmoqda..."
-    },
-    "errors": {
-      "title": "Xatolik",
-      "selectNewStatus": "Yangi holatni tanlang",
-      "statusChangeFailed": "Holat o'zgartirishda xatolik yuz berdi",
-      "loadWorkshopFailed": "Atolye ma'lumotlarini yuklashda xatolik yuz berdi."
-    },
-    "success": {
-      "title": "Muvaffaqiyat",
-      "statusChanged": "Atolye holati o'zgartirildi"
     }
+  },
+  "dialogs": {
+    "delete": {
+      "title": "Delete Workshop",
+      "description": "Are you sure you want to delete the {name} workshop? This action cannot be undone."
+    }
+  },
+  "loading": {
+    "text": "Loading data..."
+  },
+  "errors": {
+    "title": "Error",
+    "loadWorkshopFailed": "An error occurred while loading workshop data."
   }
+}
+
 }

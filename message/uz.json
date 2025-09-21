@@ -822,118 +822,71 @@
     }
   },
   "WorkshopDetailPage": {
-    "header": {
-      "description": "Atolye tafsilotlari va faollik tarixi"
-    },
-    "buttons": {
-      "back": "Orqaga",
-      "goBack": "Orqaga qaytish",
-      "changeStatus": "Holatni o'zgartirish",
-      "change": "O'zgartirish",
-      "tryAgain": "Qayta urinish",
-      "cancel": "Bekor qilish",
-      "delete": "O'chirish"
-    },
-    "status": {
-      "active": "Faol",
-      "busy": "Band",
-      "stopped": "To'xtatilgan",
-      "unknown": "Noma'lum"
-    },
-    "actions": {
-      "received": "Qabul",
-      "sent": "Yuborish",
-      "processed": "Qayta ishlash"
-    },
-    "sections": {
-      "basicInfo": {
-        "title": "Asosiy ma'lumotlar",
-        "owner": "Egasi",
-        "email": "Email",
-        "phone": "Telefon",
-        "created": "Yaratilgan"
-      },
-      "currentStatus": {
-        "title": "Hozirgi holat",
-        "status": "Holat",
-        "currentMaterial": "Hozirgi material",
-        "process": "Jarayon",
-        "workTime": "Ish vaqti",
-        "totalWorkTime": "Jami ish vaqti",
-        "completedJobs": "Bajarilgan ishlar"
-      },
-      "materialHistory": {
-        "title": "Material tarixi",
-        "description": "So'nggi material harakatlari va qayta ishlash tarixi",
-        "headers": {
-          "date": "Sana",
-          "action": "Harakat",
-          "material": "Material",
-          "destination": "Manzil",
-          "note": "Izoh"
-        },
-        "from": "dan",
-        "to": "ga"
+  "header": {
+    "description": "Ustaxona tafsilotlari va faoliyat tarixi"
+  },
+  "buttons": {
+    "back": "Orqaga",
+    "goBack": "Orqaga qaytish",
+    "cancel": "Bekor qilish",
+    "delete": "O‘chirish",
+    "tryAgain": "Qayta urinib ko‘rish"
+  },
+  "status": {
+    "active": "Faol",
+    "busy": "Band",
+    "stopped": "To‘xtatilgan",
+    "unknown": "Noma’lum"
+  },
+  "actions": {
+    "received": "Qabul qilindi",
+    "sent": "Yuborildi",
+    "processed": "Qayta ishlangan"
+  },
+  "materials": {
+    "gold": "Oltin",
+    "silver": "Kumush"
+  },
+  "filters": {
+    "today": "Bugun",
+    "7days": "7 kun",
+    "30days": "30 kun",
+    "all": "Barchasi"
+  },
+  "charts": {
+    "generalTitle": "Umumiy statistika",
+    "generalDescription": "Yuborilgan va qabul qilingan material miqdorlari",
+    "materialTitle": "Materiallar taqsimoti",
+    "materialDescription": "Qayta ishlangan material turlari",
+    "received": "Qabul qilindi",
+    "sent": "Yuborildi"
+  },
+  "sections": {
+    "materialHistory": {
+      "title": "Materiallar tarixi",
+      "description": "So‘nggi material harakatlari va qayta ishlash tarixi",
+      "processNote": "Tozalash jarayonida 20 g yo‘qotish",
+      "headers": {
+        "date": "Sana",
+        "action": "Harakat",
+        "material": "Material",
+        "note": "Izoh"
       }
-    },
-    "dialogs": {
-      "changeStatus": {
-        "title": "Atolye holatini o'zgartirish",
-        "description": "{name} uchun yangi holat tanlang"
-      },
-      "create": {
-        "title": "Yangi atolye yaratish",
-        "description": "Yangi atolye uchun asosiy ma'lumotlarni kiriting."
-      },
-      "edit": {
-        "title": "Atolyeni tahrirlash",
-        "description": "Atolye ma'lumotlarini yangilang."
-      },
-      "delete": {
-        "title": "Atolyeni o'chirish",
-        "description": "Haqiqatan ham \"{name}\" atolyesini o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi."
-      }
-    },
-    "form": {
-      "newStatus": "Yangi holat",
-      "selectStatus": "Holatni tanlang",
-      "note": "Izoh (ixtiyoriy)",
-      "notePlaceholder": "Holat o'zgarishi sababi..."
-    },
-    "loading": {
-      "text": "Ma'lumotlar yuklanmoqda..."
-    },
-    "errors": {
-      "title": "Xatolik",
-      "selectNewStatus": "Yangi holatni tanlang",
-      "statusChangeFailed": "Holat o'zgartirishda xatolik yuz berdi",
-      "loadWorkshopFailed": "Atolye ma'lumotlarini yuklashda xatolik yuz berdi."
-    },
-    "success": {
-      "title": "Muvaffaqiyat",
-      "statusChanged": "Atolye holati o'zgartirildi"
-    },
-    "filters": {
-      "today": "Bugun",
-      "7days": "7 kun",
-      "30days": "30 kun",
-      "all": "Barchasi"
-    },
-    "charts": {
-      "received": "Qabul qilingan",
-      "sent": "Chiqarilgan",
-      "generalTitle": "Kirim va chiqim",
-      "generalDescription": "Tanlangan muddat davomidagi almashilgan mahsulotlar",
-      "materialTitle": "Mahsulotlar",
-      "materialDescription": "Tanlangan muddat davomidagi almashilgan mahsulotlar"
-    },
-    "transactions": {
-      "title": "Transferlar",
-      "description":"Tanlangan muddat davomidagi transferlar",
-      "date": "Sana",
-      "material": "Material",
-      "action": "Harakat",
-      "note":"Izoh (ixtiyoriy)"
     }
+  },
+  "dialogs": {
+    "delete": {
+      "title": "Ustaxonani o‘chirish",
+      "description": "Haqiqatan ham {name} ustaxonasini o‘chirmoqchimisiz? Bu amalni qaytarib bo‘lmaydi."
+    }
+  },
+  "loading": {
+    "text": "Ma’lumotlar yuklanmoqda..."
+  },
+  "errors": {
+    "title": "Xatolik",
+    "loadWorkshopFailed": "Ustaxona ma’lumotlarini yuklashda xatolik yuz berdi."
   }
+}
+
 }

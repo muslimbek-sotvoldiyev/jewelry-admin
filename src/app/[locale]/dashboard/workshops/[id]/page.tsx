@@ -26,33 +26,6 @@ import GeneralBarChart from "./charts/GeneralBarChart";
 import MaterialsPieChart from "./charts/MaterialsPieChart";
 import { Transaction, TransactionItem } from "@/src/types/transactions";
 
-const materialHistory = [
-  {
-    id: "1",
-    date: "2024-01-25 09:30",
-    action: "received",
-    material: "250gr Oltin",
-    from: "Safe",
-    status: "received",
-  },
-  {
-    id: "2",
-    date: "2024-01-24 16:45",
-    action: "sent",
-    material: "180gr Kumush",
-    to: "Atolye-2",
-    status: "sent",
-  },
-  {
-    id: "3",
-    date: "2024-01-24 14:20",
-    action: "processed",
-    material: "200gr Kumush → 180gr Kumush",
-    note: "20gr yo'qotish tozalash jarayonida",
-    status: "processed",
-  },
-];
-
 function getStartDate(timeline) {
   const today = new Date();
   let start: Date | null = null;
@@ -93,6 +66,34 @@ export default function WorkshopDetailPage() {
     id: organizationId,
     start_date: startDate,
   });
+
+
+  const materialHistory = [
+    {
+      id: "1",
+      date: "2024-01-25 09:30",
+      action: t("actions.received"),
+      material: "250gr " + t("materials.gold"),
+      from: "Safe",
+      status: "received",
+    },
+    {
+      id: "2",
+      date: "2024-01-24 16:45",
+      action: t("actions.sent"),
+      material: "180gr " + t("materials.silver"),
+      to: "Atolye-2",
+      status: "sent",
+    },
+    {
+      id: "3",
+      date: "2024-01-24 14:20",
+      action: t("actions.processed"),
+      material: "200gr " + t("materials.silver") + " → 180gr " + t("materials.silver"),
+      note: t("sections.materialHistory.processNote"),
+      status: "processed",
+    },
+  ];
 
   const generalStats = transactions.reduce((acc, tx: Transaction) => {
     const created_at = tx.created_at.split("T")[0];
@@ -182,7 +183,7 @@ export default function WorkshopDetailPage() {
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" className="text-destructive cursor-pointer">
                 <Trash2 className="h-4 w-4" />
-                <div>O'chirish</div>
+                <div>{t("buttons.delete")}</div>
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -205,8 +206,7 @@ export default function WorkshopDetailPage() {
         </div>
       </div>
 
-      {/* Timeline Filter + Chart */}
-
+      {/* Timeline Filter */}
       <div className="flex gap-2">
         {timeLines.map((range) => (
           <Button
@@ -247,17 +247,17 @@ export default function WorkshopDetailPage() {
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("transactions.title")}</CardTitle>
-          <CardDescription>{t("transactions.description")}</CardDescription>
+          <CardTitle>{t("sections.materialHistory.title")}</CardTitle>
+          <CardDescription>{t("sections.materialHistory.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("transactions.date")}</TableHead>
-                <TableHead>{t("transactions.material")}</TableHead>
-                <TableHead>{t("transactions.action")}</TableHead>
-                <TableHead>{t("transactions.note")}</TableHead>
+                <TableHead>{t("sections.materialHistory.headers.date")}</TableHead>
+                <TableHead>{t("sections.materialHistory.headers.material")}</TableHead>
+                <TableHead>{t("sections.materialHistory.headers.action")}</TableHead>
+                <TableHead>{t("sections.materialHistory.headers.note")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

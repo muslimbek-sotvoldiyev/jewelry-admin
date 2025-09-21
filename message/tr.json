@@ -828,13 +828,13 @@
     "buttons": {
       "back": "Geri",
       "goBack": "Geri dön",
-      "changeStatus": "Durumu değiştir",
-      "change": "Değiştir",
+      "cancel": "İptal",
+      "delete": "Sil",
       "tryAgain": "Tekrar dene"
     },
     "status": {
       "active": "Aktif",
-      "busy": "Meşgul",
+      "busy": "Meşgul", 
       "stopped": "Durduruldu",
       "unknown": "Bilinmeyen"
     },
@@ -843,61 +843,49 @@
       "sent": "Gönderildi",
       "processed": "İşlendi"
     },
+    "materials": {
+      "gold": "Altın",
+      "silver": "Gümüş"
+    },
+    "filters": {
+      "today": "Bugün",
+      "7days": "7 Gün",
+      "30days": "30 Gün",
+      "all": "Tümü"
+    },
+    "charts": {
+      "generalTitle": "Genel İstatistikler",
+      "generalDescription": "Gönderilen ve alınan malzeme miktarları",
+      "materialTitle": "Malzeme Dağılımı",
+      "materialDescription": "İşlenen malzeme türleri",
+      "received": "Alınan",
+      "sent": "Gönderilen"
+    },
     "sections": {
-      "basicInfo": {
-        "title": "Temel bilgiler",
-        "owner": "Sahibi",
-        "email": "Email",
-        "phone": "Telefon",
-        "created": "Oluşturulma"
-      },
-      "currentStatus": {
-        "title": "Mevcut durum",
-        "status": "Durum",
-        "currentMaterial": "Mevcut malzeme",
-        "process": "Süreç",
-        "workTime": "Çalışma süresi",
-        "totalWorkTime": "Toplam çalışma süresi",
-        "completedJobs": "Tamamlanan işler"
-      },
       "materialHistory": {
-        "title": "Malzeme geçmişi",
+        "title": "Malzeme Geçmişi",
         "description": "Son malzeme hareketleri ve işleme geçmişi",
+        "processNote": "20gr kayıp temizleme işleminde",
         "headers": {
           "date": "Tarih",
           "action": "Hareket",
-          "material": "Malzeme",
-          "destination": "Hedef",
+          "material": "Malzeme", 
           "note": "Not"
-        },
-        "from": "den",
-        "to": "e"
+        }
       }
     },
     "dialogs": {
-      "changeStatus": {
-        "title": "Atölye durumunu değiştir",
-        "description": "{name} için yeni durum seçin"
+      "delete": {
+        "title": "Atölyeyi Sil",
+        "description": "Gerçekten {name} atölyesini silmek istiyor musunuz? Bu işlem geri alınamaz."
       }
-    },
-    "form": {
-      "newStatus": "Yeni durum",
-      "selectStatus": "Durumu seçin",
-      "note": "Not (opsiyonel)",
-      "notePlaceholder": "Durum değişikliği sebebi..."
     },
     "loading": {
       "text": "Veriler yükleniyor..."
     },
     "errors": {
       "title": "Hata",
-      "selectNewStatus": "Yeni durumu seçin",
-      "statusChangeFailed": "Durum değiştirilirken hata oluştu",
       "loadWorkshopFailed": "Atölye verileri yüklenirken hata oluştu."
-    },
-    "success": {
-      "title": "Başarılı",
-      "statusChanged": "Atölye durumu değiştirildi"
     }
-  }
+}
 }
