@@ -4,29 +4,40 @@ import { baseQuery } from "./api";
 export const ProcessesApi = createApi({
   reducerPath: "ProcessesApi",
   baseQuery,
-  tagTypes: ["Processes"],
+  tagTypes: ["Processes", "Inventory"],
   endpoints: (builder) => ({
     GetProcesses: builder.query({
       query: () => "/processes/list/",
       providesTags: ["Processes"],
     }),
-    // GetProcessById: builder.query({
-    //   query: (id) => `/processes/${id}/`,
-    // }),
     CreateProcess: builder.mutation({
       query: (data) => ({
         url: "/processes/create/",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Processes", "Inventory"],
+    }),
+    CompleteProcess: builder.mutation({
+      query: (id: number) => ({
+        url: `/processes/${id}/complete/`,
+        method: "POST",
+      }),
       invalidatesTags: ["Processes"],
     }),
-    // UpdateProcess: builder.mutation({
-    //   query: ({id, ...data}) => ({
-    //     url: '/process/'
-    //   })
-    // })
+    DeleteProcess: builder.mutation({
+      query: (id: number) => ({
+        url: `/processes/${id}/delete/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Processes"],
+    }),
   }),
 });
 
-export const { useGetProcessesQuery, useCreateProcessMutation } = ProcessesApi;
+export const {
+  useGetProcessesQuery,
+  useCreateProcessMutation,
+  useCompleteProcessMutation,
+  useDeleteProcessMutation,
+} = ProcessesApi;

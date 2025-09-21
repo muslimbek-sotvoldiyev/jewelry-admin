@@ -10,18 +10,47 @@ import { Input } from "@/src/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Search, Eye, CheckCircle, Clock, XCircle, Settings, Loader2, SquareCheckBig, Trash2 } from "lucide-react";
-import { useGetProcessesQuery } from "@/src/lib/service/processApi";
+import {
+  useCompleteProcessMutation,
+  useDeleteProcessMutation,
+  useGetProcessesQuery,
+} from "@/src/lib/service/processApi";
 import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi";
 import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi";
 import { getCurrentUser } from "@/src/lib/auth";
 import type { Process } from "@/src/types/process";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/src/components/ui/dialog";
+import { toast } from "@/src/hooks/use-toast";
 
 export default function ProcessesPage() {
   const t = useTranslations("processes");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const user = getCurrentUser();
+  const [completeOpen, setCompleteOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [completeProcess, { isLoading: completing }] = useCompleteProcessMutation();
+  const [deleteProcess, { isLoading: deleting }] = useDeleteProcessMutation();
+
+  const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
+
+  const openCompleteModal = (process: Process) => {
+    setSelectedProcess(process);
+    setCompleteOpen(true);
+  };
+
+  const openDeleteModal = (process: Process) => {
+    setSelectedProcess(process);
+    setDeleteOpen(true);
+  };
 
   const {
     data: processes = [],
@@ -35,6 +64,42 @@ export default function ProcessesPage() {
 
   const { data: inventory = [] } = useGetInventoryQuery({});
   const { data: materials = [] } = useGetMaterialsQuery({});
+
+  const handleComplete = async () => {
+    if (!selectedProcess) return;
+    try {
+      await completeProcess(selectedProcess.id).unwrap();
+      toast({
+        description: "Jarayon tasdiqlandi ✅",
+        variant: "default",
+      });
+      setCompleteOpen(false);
+    } catch (err: any) {
+      toast({
+        title: t("common.error"),
+        description: t(err?.data?.detail || "Noma’lum xato"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedProcess) return;
+    try {
+      await deleteProcess(selectedProcess.id).unwrap();
+      toast({
+        description: "Jarayon o'chirildi ✅",
+        variant: "default",
+      });
+      setDeleteOpen(false);
+    } catch (err: any) {
+      toast({
+        title: t("common.error"),
+        description: t(err?.data?.detail || "Noma’lum xato"),
+        variant: "destructive",
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     console.log(status);
@@ -115,6 +180,41 @@ export default function ProcessesPage() {
           <Link href="/dashboard/processes/create">+ {t("actions.create")}</Link>
         </Button>
       </div>
+
+      <Dialog open={completeOpen} onOpenChange={setCompleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tasdiqlaysizmi?</DialogTitle>
+            <DialogDescription>Ushbu jarayonni tasdiqlashni xohlaysizmi?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCompleteOpen(false)}>
+              Bekor qilish
+            </Button>
+
+            <Button variant="default" disabled={completing} onClick={handleComplete}>
+              {completing ? "Tasdiqlanmoqda..." : "Ha, tasdiqlayman"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>O‘chirishni xohlaysizmi?</DialogTitle>
+            <DialogDescription>Bu amalni ortga qaytarib bo‘lmaydi.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
+              Bekor qilish
+            </Button>
+            <Button variant="destructive" disabled={deleting} onClick={handleDelete}>
+              {deleting ? "O‘chirilmoqda..." : "O‘chirish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Search & Filters */}
       <Card>
@@ -216,10 +316,20 @@ export default function ProcessesPage() {
                       <TableCell>
                         {process.status == "in process" && (
                           <div className="flex gap-2">
-                            <Button className="cursor-pointer" variant="ghost" size="sm">
+                            <Button
+                              className="cursor-pointer"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openCompleteModal(process)}
+                            >
                               <SquareCheckBig className="h-4 w-4" />
                             </Button>
-                            <Button className="cursor-pointer" variant="destructive" size="sm">
+                            <Button
+                              className="cursor-pointer"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => openDeleteModal(process)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

@@ -1,111 +1,114 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useTranslations } from "next-intl"
-import { useRouter } from "@/src/i18n/routing"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Trash2, Plus, ArrowLeft, Package, ArrowRight } from "lucide-react"
-import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi"
-import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi"
-import { useCreateProcessMutation } from "@/src/lib/service/processApi"
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/src/i18n/routing";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Trash2, Plus, ArrowLeft, Package, ArrowRight } from "lucide-react";
+import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi";
+import { useGetMaterialsQuery } from "@/src/lib/service/materialsApi";
+import { useCreateProcessMutation } from "@/src/lib/service/processApi";
 
-import { getCurrentUser } from "@/src/lib/auth"
+import { getCurrentUser } from "@/src/lib/auth";
 
-import { Link } from "@/src/i18n/routing"
-import type Inventory from "@/src/types/inventory"
+import { Link } from "@/src/i18n/routing";
+import type Inventory from "@/src/types/inventory";
+import { toast } from "@/src/hooks/use-toast";
 
 interface ProcessInputCreate {
-  inventory: number | null
-  quantity: number | null
+  inventory: number | null;
+  quantity: number | null;
 }
 
 interface ProcessOutputCreate {
-  material: number | null
-  quantity: number | null
+  material: number | null;
+  quantity: number | null;
 }
 
 export default function CreateProcessPage() {
-  const t = useTranslations("createProcess")
-  const router = useRouter()
-  const currentUser = getCurrentUser()
+  const t = useTranslations("createProcess");
+  const router = useRouter();
+  const currentUser = getCurrentUser();
 
-  const [createProcess, { isLoading }] = useCreateProcessMutation()
+  const [createProcess, { isLoading }] = useCreateProcessMutation();
 
-  const [inputs, setInputs] = useState<ProcessInputCreate[]>([{ inventory: null, quantity: null }])
-  const [outputs, setOutputs] = useState<ProcessOutputCreate[]>([{ material: null, quantity: null }])
+  const [inputs, setInputs] = useState<ProcessInputCreate[]>([{ inventory: null, quantity: null }]);
+  const [outputs, setOutputs] = useState<ProcessOutputCreate[]>([{ material: null, quantity: null }]);
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: inventory = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({
     organization: currentUser?.organization?.id,
-  })
-  const { data: materials = [] } = useGetMaterialsQuery({})
+  });
+  const { data: materials = [] } = useGetMaterialsQuery({});
 
   // Add new input row
   const addInput = () => {
-    setInputs([...inputs, { inventory: null, quantity: null }])
-  }
+    setInputs([...inputs, { inventory: null, quantity: null }]);
+  };
 
   // Remove input row
   const removeInput = (index: number) => {
     if (inputs.length > 1) {
-      setInputs(inputs.filter((_, i) => i !== index))
+      setInputs(inputs.filter((_, i) => i !== index));
     }
-  }
+  };
 
   // Update input
   const updateInput = (index: number, field: keyof ProcessInputCreate, value: any) => {
-    const newInputs = [...inputs]
-    newInputs[index] = { ...newInputs[index], [field]: value }
-    setInputs(newInputs)
-  }
+    const newInputs = [...inputs];
+    newInputs[index] = { ...newInputs[index], [field]: value };
+    setInputs(newInputs);
+  };
 
   // Add new output row
   const addOutput = () => {
-    setOutputs([...outputs, { material: null, quantity: null }])
-  }
+    setOutputs([...outputs, { material: null, quantity: null }]);
+  };
 
   // Remove output row
   const removeOutput = (index: number) => {
     if (outputs.length > 1) {
-      setOutputs(outputs.filter((_, i) => i !== index))
+      setOutputs(outputs.filter((_, i) => i !== index));
     }
-  }
+  };
 
   // Update output
   const updateOutput = (index: number, field: keyof ProcessOutputCreate, value: any) => {
-    const newOutputs = [...outputs]
-    newOutputs[index] = { ...newOutputs[index], [field]: value }
-    setOutputs(newOutputs)
-  }
+    const newOutputs = [...outputs];
+    newOutputs[index] = { ...newOutputs[index], [field]: value };
+    setOutputs(newOutputs);
+  };
 
   // Validate form
   const isFormValid = () => {
     const validInputs = inputs.every(
-      (input) => input.inventory !== null && input.quantity !== null && input.quantity > 0,
-    )
+      (input) => input.inventory !== null && input.quantity !== null && input.quantity > 0
+    );
     const validOutputs = outputs.every(
-      (output) => output.material !== null && output.quantity !== null && output.quantity > 0,
-    )
-    return validInputs && validOutputs
-  }
+      (output) => output.material !== null && output.quantity !== null && output.quantity > 0
+    );
+    return validInputs && validOutputs;
+  };
 
   // Submit form
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!isFormValid()) {
-      alert(t("validation.fillAllFields"))
-      return
+      toast({
+        title: t("validation.fillAllFields"),
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // Prepare data for API
@@ -118,22 +121,23 @@ export default function CreateProcessPage() {
           material: output.material!,
           quantity: output.quantity!,
         })),
-      }
+      };
 
-      console.log("Process data to submit:", processData)
+      console.log("Process data to submit:", processData);
 
-      const result = await createProcess(processData)
-      console.log("Process created successfully:", result)
+      const result = await createProcess(processData);
+      console.log("Process created successfully:", result);
 
-      alert(t("success.created"))
-      router.push("/dashboard/processes")
+      toast({ title: t("success.created") });
+      router.push("/dashboard/processes");
     } catch (error) {
-      console.error("Error creating process:", error)
-      alert(t("errors.createFailed"))
+      console.error("Error creating process:", error);
+
+      toast({ title: t("errors.createFailed") });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -332,5 +336,5 @@ export default function CreateProcessPage() {
         </Card>
       </form>
     </div>
-  )
+  );
 }
