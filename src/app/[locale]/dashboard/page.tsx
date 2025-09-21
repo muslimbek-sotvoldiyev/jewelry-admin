@@ -12,34 +12,35 @@ import { useTranslations } from "next-intl";
 import { useGetStatsQuery } from "@/src/lib/service/dashboard";
 import { Skeleton } from "@/src/components/ui/skeleton";
 
-const recentActivities = [
-  {
-    id: 1,
-    type: "transfer",
-    message: "Atolye-1 dan Atolye-2 ga 250gr oltin yuborildi",
-    time: "5 daqiqa oldin",
-    status: "pending",
-  },
-  {
-    id: 2,
-    type: "completion",
-    message: "Atolye-3 da tozalash jarayoni yakunlandi",
-    time: "15 daqiqa oldin",
-    status: "completed",
-  },
-  {
-    id: 3,
-    type: "alert",
-    message: "Atolye-5 da ish vaqti tugadi, materiallar qaytarilmoqda",
-    time: "1 soat oldin",
-    status: "alert",
-  },
-];
-
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
 
   const { data, isLoading } = useGetStatsQuery();
+
+  // Recent activities with translations
+  const recentActivities = [
+    {
+      id: 1,
+      type: "transfer",
+      message: t("activities.examples.transfer"),
+      time: t("activities.times.5minAgo"),
+      status: "pending",
+    },
+    {
+      id: 2,
+      type: "completion",
+      message: t("activities.examples.completion"),
+      time: t("activities.times.15minAgo"),
+      status: "completed",
+    },
+    {
+      id: 3,
+      type: "alert",
+      message: t("activities.examples.alert"),
+      time: t("activities.times.1hAgo"),
+      status: "alert",
+    },
+  ];
 
   // Mock data for charts
   const materialData = [
@@ -81,7 +82,7 @@ export default function DashboardPage() {
           <Link href="/dashboard/transfers/create">
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              {t("stats.totalMaterials")}
+              {t("newTransfer")}
             </Button>
           </Link>
         </div>
@@ -91,7 +92,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Jami mahsulotlar</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.totalMaterials")}</CardTitle>
             <Gem className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -101,7 +102,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faol atolyeler</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.activeWorkshops")}</CardTitle>
             <Factory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -111,7 +112,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bugungi transferlar</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.todayTransfers")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -121,7 +122,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kutilayotgan</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.pending")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>{isLoading ? <Skeleton className="h-6 w-10" /> : <div className="text-2xl font-bold">3</div>}</CardContent>
@@ -133,8 +134,8 @@ export default function DashboardPage() {
         {/* Material Inventory Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Material inventari</CardTitle>
-            <CardDescription>Hozirgi material miqdorlari</CardDescription>
+            <CardTitle>{t("charts.materialsInventory")}</CardTitle>
+            <CardDescription>{t("charts.materialsInventoryDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -152,8 +153,8 @@ export default function DashboardPage() {
         {/* Weekly Transfers Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Haftalik transferlar</CardTitle>
-            <CardDescription>So'nggi 7 kun davomidagi faollik</CardDescription>
+            <CardTitle>{t("charts.weeklyTransfers")}</CardTitle>
+            <CardDescription>{t("charts.weeklyTransfersDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -174,8 +175,8 @@ export default function DashboardPage() {
         {/* Workshop Status */}
         <Card>
           <CardHeader>
-            <CardTitle>Atolye holati</CardTitle>
-            <CardDescription>Hozirgi atolyeler faolligi</CardDescription>
+            <CardTitle>{t("charts.workshopStatus")}</CardTitle>
+            <CardDescription>{t("charts.workshopStatusDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
@@ -204,8 +205,8 @@ export default function DashboardPage() {
         {/* Recent Activities */}
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>So'nggi faollik</CardTitle>
-            <CardDescription>Tizimda sodir bo'lgan so'nggi hodisalar</CardDescription>
+            <CardTitle>{t("activities.recent")}</CardTitle>
+            <CardDescription>{t("activities.recentDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -224,7 +225,9 @@ export default function DashboardPage() {
                     variant={activity.status === "completed" ? "default" : activity.status === "pending" ? "secondary" : "destructive"}
                     className="flex-shrink-0"
                   >
-                    {activity.status === "completed" ? "Bajarildi" : activity.status === "pending" ? "Kutilmoqda" : "Diqqat"}
+                    {activity.status === "completed" ? t("activities.statuses.completed") : 
+                     activity.status === "pending" ? t("activities.statuses.pending") : 
+                     t("activities.statuses.alert")}
                   </Badge>
                 </div>
               ))}

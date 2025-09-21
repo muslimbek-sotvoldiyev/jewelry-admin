@@ -18,9 +18,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Material from "@/src/types/material"
 import { unitColors, unitLabels } from "@/src/constants/units"
+import { useTranslations } from "next-intl"
 
 
 export default function MaterialsPage() {
+  const t = useTranslations("materials")
   const dispatch = useDispatch()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -55,8 +57,8 @@ export default function MaterialsPage() {
     // Validate required fields
     if (!formData.name || !formData.unit) {
       toast({
-        title: "Xatolik",
-        description: "Barcha majburiy maydonlarni to'ldiring",
+        title: t("errors.title"),
+        description: t("errors.fillRequired"),
         variant: "destructive",
       })
       return
@@ -65,8 +67,8 @@ export default function MaterialsPage() {
     // Check if material name already exists
     if (materials.some((material: Material) => material.name.toLowerCase() === formData.name.toLowerCase())) {
       toast({
-        title: "Xatolik",
-        description: "Bu material nomi allaqachon mavjud",
+        title: t("errors.title"),
+        description: t("errors.nameExists"),
         variant: "destructive",
       })
       return
@@ -83,14 +85,14 @@ export default function MaterialsPage() {
       setIsCreateDialogOpen(false)
 
       toast({
-        title: "Muvaffaqiyat",
-        description: "Yangi material yaratildi",
+        title: t("success.title"),
+        description: t("success.created"),
       })
       dispatch(MaterialsApi.util.resetApiState())
     } catch (error) {
       toast({
-        title: "Xatolik",
-        description: "Material yaratishda xatolik yuz berdi",
+        title: t("errors.title"),
+        description: t("errors.createFailed"),
         variant: "destructive",
       })
     }
@@ -111,8 +113,8 @@ export default function MaterialsPage() {
     // Validate required fields
     if (!formData.name || !formData.unit) {
       toast({
-        title: "Xatolik",
-        description: "Barcha majburiy maydonlarni to'ldiring",
+        title: t("errors.title"),
+        description: t("errors.fillRequired"),
         variant: "destructive",
       })
       return
@@ -126,8 +128,8 @@ export default function MaterialsPage() {
       )
     ) {
       toast({
-        title: "Xatolik",
-        description: "Bu material nomi allaqachon mavjud",
+        title: t("errors.title"),
+        description: t("errors.nameExists"),
         variant: "destructive",
       })
       return
@@ -145,14 +147,14 @@ export default function MaterialsPage() {
       setSelectedMaterial(null)
 
       toast({
-        title: "Muvaffaqiyat",
-        description: "Material ma'lumotlari yangilandi",
+        title: t("success.title"),
+        description: t("success.updated"),
       })
       dispatch(MaterialsApi.util.resetApiState())
     } catch (error) {
       toast({
-        title: "Xatolik",
-        description: "Material yangilashda xatolik yuz berdi",
+        title: t("errors.title"),
+        description: t("errors.updateFailed"),
         variant: "destructive",
       })
     }
@@ -165,14 +167,14 @@ export default function MaterialsPage() {
       setSelectedMaterial(null)
 
       toast({
-        title: "Muvaffaqiyat",
-        description: "Material o'chirildi",
+        title: t("success.title"),
+        description: t("success.deleted"),
       })
       dispatch(MaterialsApi.util.resetApiState())
     } catch (error) {
       toast({
-        title: "Xatolik",
-        description: "Material o'chirishda xatolik yuz berdi",
+        title: t("errors.title"),
+        description: t("errors.deleteFailed"),
         variant: "destructive",
       })
     }
@@ -188,7 +190,7 @@ export default function MaterialsPage() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Ma'lumotlar yuklanmoqda...</span>
+          <span className="ml-2">{t("loading")}</span>
         </div>
       </div>
     )
@@ -199,8 +201,8 @@ export default function MaterialsPage() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-red-600 mb-4">Materiallarni yuklashda xatolik yuz berdi</p>
-            <Button onClick={() => window.location.reload()}>Qayta urinish</Button>
+            <p className="text-red-600 mb-4">{t("errors.loadFailed")}</p>
+            <Button onClick={() => window.location.reload()}>{t("actions.retry")}</Button>
           </div>
         </div>
       </div>
@@ -211,47 +213,47 @@ export default function MaterialsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Materiallar</h1>
-          <p className="text-muted-foreground">Tizim materiallarini boshqaring</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Yangi material
+              {t("actions.create")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
-              <DialogTitle>Yangi material yaratish</DialogTitle>
-              <DialogDescription>Tizimga yangi material qo'shing</DialogDescription>
+              <DialogTitle>{t("dialogs.create.title")}</DialogTitle>
+              <DialogDescription>{t("dialogs.create.description")}</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Material nomi *</Label>
+                <Label htmlFor="name">{t("form.name")} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Masalan: Oltin (24K)"
+                  placeholder={t("form.namePlaceholder")}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="unit">O'lchov birligi *</Label>
+                <Label htmlFor="unit">{t("form.unit")} *</Label>
                 <Select
                   value={formData.unit}
                   onValueChange={(value: "g" | "pcs" | "ct") => setFormData({ ...formData, unit: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="O'lchov birligini tanlang" />
+                    <SelectValue placeholder={t("form.unitPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="g">Gram (g)</SelectItem>
-                    <SelectItem value="pcs">Dona (pcs)</SelectItem>
-                    <SelectItem value="ct">Karat (ct)</SelectItem>
+                    <SelectItem value="g">{t("units.gram")}</SelectItem>
+                    <SelectItem value="pcs">{t("units.pieces")}</SelectItem>
+                    <SelectItem value="ct">{t("units.carat")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -265,9 +267,9 @@ export default function MaterialsPage() {
                   resetForm()
                 }}
               >
-                Bekor qilish
+                {t("actions.cancel")}
               </Button>
-              <Button onClick={handleCreateMaterial}>Yaratish</Button>
+              <Button onClick={handleCreateMaterial}>{t("actions.create")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -278,7 +280,7 @@ export default function MaterialsPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Materiallarni qidirish..."
+            placeholder={t("search.placeholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -288,18 +290,18 @@ export default function MaterialsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Materiallar ro'yxati</CardTitle>
-          <CardDescription>Jami {materials.length} ta material</CardDescription>
+          <CardTitle>{t("table.title")}</CardTitle>
+          <CardDescription>{t("table.description", { count: materials.length })}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Nomi</TableHead>
-                <TableHead>O‘lchov birligi</TableHead>
-                <TableHead>Yaratilgan sana</TableHead>
-                <TableHead className="text-right">Amallar</TableHead>
+                <TableHead>{t("table.columns.name")}</TableHead>
+                <TableHead>{t("table.columns.unit")}</TableHead>
+                <TableHead>{t("table.columns.createdAt")}</TableHead>
+                <TableHead className="text-right">{t("table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -321,14 +323,14 @@ export default function MaterialsPage() {
                       size="sm"
                       onClick={() => handleEditMaterial(material)}
                     >
-                      <Edit className="h-4 w-4 mr-1" /> Tahrirlash
+                      <Edit className="h-4 w-4 mr-1" /> {t("actions.edit")}
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => confirmDelete(material)}
                     >
-                      <Trash2 className="h-4 w-4 mr-1" /> O‘chirish
+                      <Trash2 className="h-4 w-4 mr-1" /> {t("actions.delete")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -337,38 +339,39 @@ export default function MaterialsPage() {
           </Table>
         </CardContent>
       </Card>
+
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Materialni tahrirlash</DialogTitle>
-            <DialogDescription>Material ma'lumotlarini yangilang</DialogDescription>
+            <DialogTitle>{t("dialogs.edit.title")}</DialogTitle>
+            <DialogDescription>{t("dialogs.edit.description")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">Material nomi *</Label>
+              <Label htmlFor="edit-name">{t("form.name")} *</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Masalan: Oltin (24K)"
+                placeholder={t("form.namePlaceholder")}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="edit-unit">O'lchov birligi *</Label>
+              <Label htmlFor="edit-unit">{t("form.unit")} *</Label>
               <Select
                 value={formData.unit}
                 onValueChange={(value: "g" | "pcs" | "ct") => setFormData({ ...formData, unit: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="O'lchov birligini tanlang" />
+                  <SelectValue placeholder={t("form.unitPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="g">Gram (g)</SelectItem>
-                  <SelectItem value="pcs">Dona (pcs)</SelectItem>
-                  <SelectItem value="ct">Karat (ct)</SelectItem>
+                  <SelectItem value="g">{t("units.gram")}</SelectItem>
+                  <SelectItem value="pcs">{t("units.pieces")}</SelectItem>
+                  <SelectItem value="ct">{t("units.carat")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -383,9 +386,9 @@ export default function MaterialsPage() {
                 setSelectedMaterial(null)
               }}
             >
-              Bekor qilish
+              {t("actions.cancel")}
             </Button>
-            <Button onClick={handleUpdateMaterial}>Yangilash</Button>
+            <Button onClick={handleUpdateMaterial}>{t("actions.update")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -394,19 +397,18 @@ export default function MaterialsPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Materialni o'chirish</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialogs.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Haqiqatan ham <strong>{selectedMaterial?.name}</strong> materialini o'chirmoqchimisiz? Bu amalni bekor
-              qilib bo'lmaydi.
+              {t("dialogs.delete.description", { name: selectedMaterial?.name || "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Yo'q</AlertDialogCancel>
+            <AlertDialogCancel>{t("dialogs.delete.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => selectedMaterial && handleDeleteMaterial(selectedMaterial.id)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Ha, o'chirish
+              {t("dialogs.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
