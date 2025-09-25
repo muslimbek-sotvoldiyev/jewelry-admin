@@ -2,7 +2,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Gem, Factory, TrendingUp, Clock, AlertTriangle, Plus, Eye, ArrowUpRight } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
@@ -96,7 +109,11 @@ export default function DashboardPage() {
             <Gem className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-6 w-24" /> : <div className="text-2xl font-bold">{data?.inventory.total} g</div>}
+            {isLoading ? (
+              <Skeleton className="h-6 w-24" />
+            ) : (
+              <div className="text-2xl font-bold">{data?.inventory.total} g</div>
+            )}
           </CardContent>
         </Card>
 
@@ -106,7 +123,11 @@ export default function DashboardPage() {
             <Factory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-6 w-16" /> : <div className="text-2xl font-bold">{data?.organization.count}</div>}
+            {isLoading ? (
+              <Skeleton className="h-6 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{data?.organization.count}</div>
+            )}
           </CardContent>
         </Card>
 
@@ -116,7 +137,11 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-6 w-12" /> : <div className="text-2xl font-bold"> {data?.transaction.count} </div>}
+            {isLoading ? (
+              <Skeleton className="h-6 w-12" />
+            ) : (
+              <div className="text-2xl font-bold"> {data?.transaction.count} </div>
+            )}
           </CardContent>
         </Card>
 
@@ -125,7 +150,9 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">{t("stats.pending")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>{isLoading ? <Skeleton className="h-6 w-10" /> : <div className="text-2xl font-bold">3</div>}</CardContent>
+          <CardContent>
+            {isLoading ? <Skeleton className="h-6 w-10" /> : <div className="text-2xl font-bold">3</div>}
+          </CardContent>
         </Card>
       </div>
 
@@ -181,7 +208,15 @@ export default function DashboardPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={workshopStatus} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
+                <Pie
+                  data={workshopStatus}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
                   {workshopStatus.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -222,12 +257,20 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
                   </div>
                   <Badge
-                    variant={activity.status === "completed" ? "default" : activity.status === "pending" ? "secondary" : "destructive"}
+                    variant={
+                      activity.status === "completed"
+                        ? "default"
+                        : activity.status === "pending"
+                        ? "secondary"
+                        : "destructive"
+                    }
                     className="flex-shrink-0"
                   >
-                    {activity.status === "completed" ? t("activities.statuses.completed") : 
-                     activity.status === "pending" ? t("activities.statuses.pending") : 
-                     t("activities.statuses.alert")}
+                    {activity.status === "completed"
+                      ? t("activities.statuses.completed")
+                      : activity.status === "pending"
+                      ? t("activities.statuses.pending")
+                      : t("activities.statuses.alert")}
                   </Badge>
                 </div>
               ))}

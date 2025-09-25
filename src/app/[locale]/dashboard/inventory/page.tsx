@@ -7,7 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +27,12 @@ import {
   AlertDialogTitle,
 } from "@/src/components/ui/alert-dialog";
 import { Badge } from "@/src/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/src/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
 import { Search, Plus, MoreHorizontal, Edit, Trash2, Loader2, Package2, Building2 } from "lucide-react";
 import { toast } from "@/src/hooks/use-toast";
 import {
@@ -81,6 +94,8 @@ export default function InventoryPage() {
 
   const filteredInventory = inventory.filter((item: Inventory) => {
     const search = searchTerm?.toLowerCase() ?? "";
+
+    if (!parseFloat(item.quantity)) return false;
 
     if (!search && organizationFilter == "all") return true;
 
@@ -261,7 +276,10 @@ export default function InventoryPage() {
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="material">{t("form.material")} *</Label>
-                  <Select value={formData.material_id} onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}>
+                  <Select
+                    value={formData.material_id}
+                    onValueChange={(value) => setFormData({ ...formData, material_id: value, quantity: "" })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t("form.selectMaterial")} />
                     </SelectTrigger>
@@ -283,7 +301,10 @@ export default function InventoryPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="organization">{t("form.organization")} *</Label>
-                  <Select value={formData.organization_id} onValueChange={(value) => setFormData({ ...formData, organization_id: value })}>
+                  <Select
+                    value={formData.organization_id}
+                    onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t("form.selectOrganization")} />
                     </SelectTrigger>
@@ -338,12 +359,20 @@ export default function InventoryPage() {
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={t("search.placeholder")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8" />
+          <Input
+            placeholder={t("search.placeholder")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
         </div>
 
         {isBank && (
           <div className="flex items-center space-x-2">
-            <Select value={organizationFilter?.toString() ?? ""} onValueChange={(value) => setOrganizationFilter(value)}>
+            <Select
+              value={organizationFilter?.toString() ?? ""}
+              onValueChange={(value) => setOrganizationFilter(value)}
+            >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder={t("filters.byOrganization")} />
               </SelectTrigger>
@@ -447,7 +476,10 @@ export default function InventoryPage() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="edit-material">{t("form.material")} *</Label>
-              <Select value={formData.material_id} onValueChange={(value) => setFormData({ ...formData, material_id: value })}>
+              <Select
+                value={formData.material_id}
+                onValueChange={(value) => setFormData({ ...formData, material_id: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("form.selectMaterial")} />
                 </SelectTrigger>
@@ -463,7 +495,10 @@ export default function InventoryPage() {
 
             <div className="grid gap-2">
               <Label htmlFor="edit-organization">{t("form.organization")} *</Label>
-              <Select value={formData.organization_id} onValueChange={(value) => setFormData({ ...formData, organization_id: value })}>
+              <Select
+                value={formData.organization_id}
+                onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("form.selectOrganization")} />
                 </SelectTrigger>

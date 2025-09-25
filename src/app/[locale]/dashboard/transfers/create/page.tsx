@@ -80,7 +80,7 @@ export default function CreateTransferPage() {
       setError(
         t("errors.quantityExceedsAvailable", {
           name: selectedInv.name,
-          available: availableQty.toFixed(2),
+          available: availableQty.toFixed(3),
           unit: selectedInv.unit || "dona",
         }),
       )
@@ -89,10 +89,10 @@ export default function CreateTransferPage() {
 
     if (existingItemIndex !== -1) {
       const updatedItems = [...items]
-      updatedItems[existingItemIndex].quantity = newTotalQty.toFixed(2)
+      updatedItems[existingItemIndex].quantity = newTotalQty.toFixed(3)
       setItems(updatedItems)
     } else {
-      setItems([...items, { inventory: currentItem.inventory, quantity: addQty.toFixed(2) }])
+      setItems([...items, { inventory: currentItem.inventory, quantity: addQty.toFixed(3) }])
     }
 
     setCurrentItem({ inventory: "", quantity: "" })
@@ -216,7 +216,7 @@ export default function CreateTransferPage() {
           <CardHeader className="border-b border-gray-200 pb-3 flex justify-between items-center">
             <CardTitle className="text-base font-medium text-gray-700">{t("inventoryLabel")}</CardTitle>
             <span className="text-sm text-gray-500">
-              Jami: {totalItems} ta, {totalQuantity.toFixed(2)} birlik
+              Jami: {totalItems} ta, {totalQuantity.toFixed(3)} birlik
             </span>
           </CardHeader>
           <CardContent className="pt-4 space-y-6">
@@ -238,7 +238,7 @@ export default function CreateTransferPage() {
 
                       return (
                         <SelectItem key={inv.id} value={String(inv.id)}>
-                          {materialName} ({availableQty.toFixed(2)} {unit})
+                          {materialName} ({availableQty.toFixed(3)} {unit})
                         </SelectItem>
                       )
                     })}
@@ -292,9 +292,9 @@ export default function CreateTransferPage() {
                         <td className="p-3">{inv?.material.name ?? "Noma'lum"}</td>
                         <td className="p-3 font-medium">{it.quantity}</td>
                         <td className="p-3">{inv?.material.unit ?? "-"}</td>
-                        <td className="p-3">{availableQty.toFixed(2)}</td>
+                        <td className="p-3">{availableQty.toFixed(3)}</td>
                         <td className="p-3">
-                          <span className={remaining >= 0 ? "text-green-600" : "text-red-600"}>{remaining.toFixed(2)}</span>
+                          <span className={remaining >= 0 ? "text-green-600" : "text-red-600"}>{remaining.toFixed(3)}</span>
                         </td>
                         <td className="p-3">
                           <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(i)} className="text-red-500 hover:text-red-700">
