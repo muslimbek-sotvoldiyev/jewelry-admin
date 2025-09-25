@@ -6,18 +6,15 @@ import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { Input } from "@/src/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/src/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import { Label } from "@/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Plus, Search, Eye, Edit, Clock, Factory, AlertTriangle, Loader2, Trash2 } from "lucide-react";
@@ -25,8 +22,6 @@ import { useToast } from "@/src/hooks/use-toast";
 import {
   useGetOrganizationsQuery,
   useAddOrganizationMutation,
-  useDeleteOrganizationMutation,
-  useUpdateOrganizationMutation,
 } from "@/src/lib/service/atolyeApi";
 import { Link } from "@/src/i18n/routing";
 import { useTranslations } from "next-intl";
@@ -183,7 +178,10 @@ export default function WorkshopsPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="type">{t("WorkshopsPage.form.workshopType")} *</Label>
-                <Select value={newWorkshop.type} onValueChange={(value) => setNewWorkshop({ ...newWorkshop, type: value })}>
+                <Select
+                  value={newWorkshop.type}
+                  onValueChange={(value) => setNewWorkshop({ ...newWorkshop, type: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder={t("WorkshopsPage.form.selectWorkshopType")} />
                   </SelectTrigger>

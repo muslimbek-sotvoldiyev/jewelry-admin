@@ -1,57 +1,79 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useDispatch } from "react-redux"
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Badge } from "@/src/components/ui/badge"
-import { toast } from "@/src/hooks/use-toast"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/src/components/ui/alert-dialog"
-import { useGetMaterialsQuery, useAddMaterialMutation, useUpdateMaterialMutation, useDeleteMaterialMutation, MaterialsApi } from "@/src/lib/service/materialsApi"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Badge } from "@/src/components/ui/badge";
+import { toast } from "@/src/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/components/ui/alert-dialog";
+import {
+  useGetMaterialsQuery,
+  useAddMaterialMutation,
+  useUpdateMaterialMutation,
+  useDeleteMaterialMutation,
+  MaterialsApi,
+} from "@/src/lib/service/materialsApi";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
 
-import { Search, Plus, Edit, Trash2, Loader2 } from "lucide-react"
-import Material from "@/src/types/material"
-import { unitColors, unitLabels } from "@/src/constants/units"
-import { useTranslations } from "next-intl"
-
+import { Search, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import Material from "@/src/types/material";
+import { unitColors, unitLabels } from "@/src/constants/units";
+import { useTranslations } from "next-intl";
 
 export default function MaterialsPage() {
-  const t = useTranslations("materials")
-  const dispatch = useDispatch()
+  const t = useTranslations("materials");
+  const dispatch = useDispatch();
 
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("");
   const {
     data: materials = [],
     isLoading: materialsLoading,
     error: materialsError,
   } = useGetMaterialsQuery({
     search: searchTerm,
-  })
-  const [addMaterial] = useAddMaterialMutation()
-  const [updateMaterial] = useUpdateMaterialMutation()
-  const [deleteMaterial] = useDeleteMaterialMutation()
+  });
+  const [addMaterial] = useAddMaterialMutation();
+  const [updateMaterial] = useUpdateMaterialMutation();
+  const [deleteMaterial] = useDeleteMaterialMutation();
 
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     unit: "" as "g" | "pcs" | "ct" | "",
-  })
+  });
 
   const resetForm = () => {
     setFormData({
       name: "",
       unit: "",
-    })
-  }
+    });
+  };
 
   const handleCreateMaterial = async () => {
     // Validate required fields
@@ -60,8 +82,8 @@ export default function MaterialsPage() {
         title: t("errors.title"),
         description: t("errors.fillRequired"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Check if material name already exists
@@ -70,45 +92,45 @@ export default function MaterialsPage() {
         title: t("errors.title"),
         description: t("errors.nameExists"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     const apiData = {
       name: formData.name,
       unit: formData.unit,
-    }
+    };
 
     try {
-      await addMaterial(apiData).unwrap()
-      resetForm()
-      setIsCreateDialogOpen(false)
+      await addMaterial(apiData).unwrap();
+      resetForm();
+      setIsCreateDialogOpen(false);
 
       toast({
         title: t("success.title"),
         description: t("success.created"),
-      })
-      dispatch(MaterialsApi.util.resetApiState())
+      });
+      dispatch(MaterialsApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("errors.title"),
         description: t("errors.createFailed"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleEditMaterial = (material: Material) => {
-    setSelectedMaterial(material)
+    setSelectedMaterial(material);
     setFormData({
       name: material.name,
       unit: material.unit as "g" | "pcs" | "ct" | "",
-    })
-    setIsEditDialogOpen(true)
-  }
+    });
+    setIsEditDialogOpen(true);
+  };
 
   const handleUpdateMaterial = async () => {
-    if (!selectedMaterial) return
+    if (!selectedMaterial) return;
 
     // Validate required fields
     if (!formData.name || !formData.unit) {
@@ -116,74 +138,74 @@ export default function MaterialsPage() {
         title: t("errors.title"),
         description: t("errors.fillRequired"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Check if material name already exists (excluding current material)
     if (
       materials.some(
         (material: Material) =>
-          material.id !== selectedMaterial.id && material.name.toLowerCase() === formData.name.toLowerCase(),
+          material.id !== selectedMaterial.id && material.name.toLowerCase() === formData.name.toLowerCase()
       )
     ) {
       toast({
         title: t("errors.title"),
         description: t("errors.nameExists"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     const apiData = {
       name: formData.name,
       unit: formData.unit,
-    }
+    };
 
     try {
-      await updateMaterial({ id: selectedMaterial.id, ...apiData }).unwrap()
-      resetForm()
-      setIsEditDialogOpen(false)
-      setSelectedMaterial(null)
+      await updateMaterial({ id: selectedMaterial.id, ...apiData }).unwrap();
+      resetForm();
+      setIsEditDialogOpen(false);
+      setSelectedMaterial(null);
 
       toast({
         title: t("success.title"),
         description: t("success.updated"),
-      })
-      dispatch(MaterialsApi.util.resetApiState())
+      });
+      dispatch(MaterialsApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("errors.title"),
         description: t("errors.updateFailed"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleDeleteMaterial = async (materialId: number) => {
     try {
-      await deleteMaterial(materialId).unwrap()
-      setIsDeleteDialogOpen(false)
-      setSelectedMaterial(null)
+      await deleteMaterial(materialId).unwrap();
+      setIsDeleteDialogOpen(false);
+      setSelectedMaterial(null);
 
       toast({
         title: t("success.title"),
         description: t("success.deleted"),
-      })
-      dispatch(MaterialsApi.util.resetApiState())
+      });
+      dispatch(MaterialsApi.util.resetApiState());
     } catch (error) {
       toast({
         title: t("errors.title"),
         description: t("errors.deleteFailed"),
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const confirmDelete = (material: Material) => {
-    setSelectedMaterial(material)
-    setIsDeleteDialogOpen(true)
-  }
+    setSelectedMaterial(material);
+    setIsDeleteDialogOpen(true);
+  };
 
   if (materialsLoading) {
     return (
@@ -193,7 +215,7 @@ export default function MaterialsPage() {
           <span className="ml-2">{t("loading")}</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (materialsError) {
@@ -206,7 +228,7 @@ export default function MaterialsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -263,8 +285,8 @@ export default function MaterialsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setIsCreateDialogOpen(false)
-                  resetForm()
+                  setIsCreateDialogOpen(false);
+                  resetForm();
                 }}
               >
                 {t("actions.cancel")}
@@ -314,22 +336,12 @@ export default function MaterialsPage() {
                       {unitLabels[material.unit]} ({material.unit})
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    {new Date(material.created_at).toLocaleDateString("uz-UZ")}
-                  </TableCell>
+                  <TableCell>{new Date(material.created_at).toLocaleDateString("uz-UZ")}</TableCell>
                   <TableCell className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditMaterial(material)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => handleEditMaterial(material)}>
                       <Edit className="h-4 w-4 mr-1" /> {t("actions.edit")}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => confirmDelete(material)}
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => confirmDelete(material)}>
                       <Trash2 className="h-4 w-4 mr-1" /> {t("actions.delete")}
                     </Button>
                   </TableCell>
@@ -381,9 +393,9 @@ export default function MaterialsPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setIsEditDialogOpen(false)
-                resetForm()
-                setSelectedMaterial(null)
+                setIsEditDialogOpen(false);
+                resetForm();
+                setSelectedMaterial(null);
               }}
             >
               {t("actions.cancel")}
@@ -414,5 +426,5 @@ export default function MaterialsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

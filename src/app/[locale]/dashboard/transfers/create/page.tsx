@@ -1,79 +1,85 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "@/src/i18n/routing"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Plus, Trash2, Loader2 } from "lucide-react"
-import { TooltipProvider } from "@/src/components/ui/tooltip"
-import { useGetOrganizationsQuery } from "@/src/lib/service/atolyeApi"
-import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi"
-import { useAddTransactionMutation } from "@/src/lib/service/transactionsApi"
-import { toast } from "@/src/hooks/use-toast"
-import type Organization from "@/src/types/organization"
-import type Inventory from "@/src/types/inventory"
-import { getCurrentUser } from "@/src/lib/auth"
-import { useTranslations } from "next-intl"
+"use client";
+import { useState } from "react";
+import { useRouter } from "@/src/i18n/routing";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Plus, Trash2, Loader2 } from "lucide-react";
+import { TooltipProvider } from "@/src/components/ui/tooltip";
+import { useGetOrganizationsQuery } from "@/src/lib/service/atolyeApi";
+import { useGetInventoryQuery } from "@/src/lib/service/inventoryApi";
+import { useAddTransactionMutation } from "@/src/lib/service/transactionsApi";
+import { toast } from "@/src/hooks/use-toast";
+import type Organization from "@/src/types/organization";
+import type Inventory from "@/src/types/inventory";
+import { getCurrentUser } from "@/src/lib/auth";
+import { useTranslations } from "next-intl";
 
 export default function CreateTransferPage() {
-  const t = useTranslations("createTransfer")
-  const router = useRouter()
-  const currentUser = getCurrentUser()
+  const t = useTranslations("createTransfer");
+  const router = useRouter();
+  const currentUser = getCurrentUser();
 
-  const { data: receivers = [] as Organization[], isLoading: receiversLoading } = useGetOrganizationsQuery({})
+  const { data: receivers = [] as Organization[], isLoading: receiversLoading } = useGetOrganizationsQuery({});
   const { data: inventories = [] as Inventory[], isLoading: inventoriesLoading } = useGetInventoryQuery({
     organization: currentUser?.organization?.id,
-  })
+  });
 
-  const [addTransaction, { isLoading: isSubmitting }] = useAddTransactionMutation()
+  const [addTransaction, { isLoading: isSubmitting }] = useAddTransactionMutation();
 
-  const [receiver, setReceiver] = useState("")
-  const [items, setItems] = useState<{ inventory: string; quantity: string }[]>([])
-  const [currentItem, setCurrentItem] = useState({ inventory: "", quantity: "" })
-  const [error, setError] = useState("")
+  const [receiver, setReceiver] = useState("");
+  const [items, setItems] = useState<{ inventory: string; quantity: string }[]>([]);
+  const [currentItem, setCurrentItem] = useState({ inventory: "", quantity: "" });
+  const [error, setError] = useState("");
 
   const parseQuantity = (quantity: any): number => {
-    if (typeof quantity === "number") return quantity
+    if (typeof quantity === "number") return quantity;
     if (typeof quantity === "string") {
-      const parsed = Number.parseFloat(quantity)
-      return Number.isNaN(parsed) ? 0 : parsed
+      const parsed = Number.parseFloat(quantity);
+      return Number.isNaN(parsed) ? 0 : parsed;
     }
-    return 0
-  }
+    return 0;
+  };
 
-  const availableInventories = inventories.filter((inv: Inventory) => parseQuantity(inv.quantity) > 0)
+  const availableInventories = inventories.filter((inv: Inventory) => parseQuantity(inv.quantity) > 0);
 
   const isValidQuantity = (quantity: string): boolean => {
-    const num = Number.parseFloat(quantity)
-    return !Number.isNaN(num) && num > 0
-  }
+    const num = Number.parseFloat(quantity);
+    return !Number.isNaN(num) && num > 0;
+  };
 
   const handleAddItem = () => {
     if (!currentItem.inventory || !isValidQuantity(currentItem.quantity)) {
-      setError(t("errors.invalidInventoryOrQuantity"))
-      return
+      setError(t("errors.invalidInventoryOrQuantity"));
+      return;
     }
 
-    const selectedInv = inventories.find((inv) => String(inv.id) === currentItem.inventory)
+    const selectedInv = inventories.find((inv) => String(inv.id) === currentItem.inventory);
     if (!selectedInv) {
-      setError(t("errors.inventoryNotFound"))
-      return
+      setError(t("errors.inventoryNotFound"));
+      return;
     }
 
-    const availableQty = parseQuantity(selectedInv.quantity)
-    const addQty = Number.parseFloat(currentItem.quantity)
+    const availableQty = parseQuantity(selectedInv.quantity);
+    const addQty = Number.parseFloat(currentItem.quantity);
 
     if (availableQty <= 0) {
-      setError(`${t("errors.quantityExceedsAvailable", { name: selectedInv.name, available: 0, unit: selectedInv.unit || "dona" })}`)
-      return
+      setError(
+        `${t("errors.quantityExceedsAvailable", {
+          name: selectedInv.name,
+          available: 0,
+          unit: selectedInv.unit || "dona",
+        })}`
+      );
+      return;
     }
 
-    const existingItemIndex = items.findIndex((item) => item.inventory === currentItem.inventory)
-    let newTotalQty = addQty
+    const existingItemIndex = items.findIndex((item) => item.inventory === currentItem.inventory);
+    let newTotalQty = addQty;
     if (existingItemIndex !== -1) {
-      newTotalQty += Number.parseFloat(items[existingItemIndex].quantity)
+      newTotalQty += Number.parseFloat(items[existingItemIndex].quantity);
     }
 
     if (newTotalQty > availableQty) {
@@ -82,31 +88,31 @@ export default function CreateTransferPage() {
           name: selectedInv.name,
           available: availableQty.toFixed(3),
           unit: selectedInv.unit || "dona",
-        }),
-      )
-      return
+        })
+      );
+      return;
     }
 
     if (existingItemIndex !== -1) {
-      const updatedItems = [...items]
-      updatedItems[existingItemIndex].quantity = newTotalQty.toFixed(3)
-      setItems(updatedItems)
+      const updatedItems = [...items];
+      updatedItems[existingItemIndex].quantity = newTotalQty.toFixed(3);
+      setItems(updatedItems);
     } else {
-      setItems([...items, { inventory: currentItem.inventory, quantity: addQty.toFixed(3) }])
+      setItems([...items, { inventory: currentItem.inventory, quantity: addQty.toFixed(3) }]);
     }
 
-    setCurrentItem({ inventory: "", quantity: "" })
-    setError("")
-  }
+    setCurrentItem({ inventory: "", quantity: "" });
+    setError("");
+  };
 
   const handleRemoveItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index))
-  }
+    setItems(items.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async () => {
     if (!receiver || items.length === 0) {
-      setError(t("errors.receiverOrItemsRequired"))
-      return
+      setError(t("errors.receiverOrItemsRequired"));
+      return;
     }
 
     const payload = {
@@ -115,33 +121,33 @@ export default function CreateTransferPage() {
         inventory: Number(item.inventory),
         quantity: item.quantity,
       })),
-    }
+    };
 
     try {
-      await addTransaction(payload).unwrap()
+      await addTransaction(payload).unwrap();
       toast({
         title: t("success.title"),
         description: t("success.description"),
         duration: 3000,
-      })
-      setReceiver("")
-      setItems([])
-      setCurrentItem({ inventory: "", quantity: "" })
-      setError("")
-      setTimeout(() => router.push("/dashboard/transfers"), 1000)
+      });
+      setReceiver("");
+      setItems([]);
+      setCurrentItem({ inventory: "", quantity: "" });
+      setError("");
+      setTimeout(() => router.push("/dashboard/transfers"), 1000);
     } catch (error: any) {
-      const errorMessage = error?.data?.message || t("errors.transactionFailed")
-      setError(errorMessage)
+      const errorMessage = error?.data?.message || t("errors.transactionFailed");
+      setError(errorMessage);
       toast({
         title: "Xatolik!",
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
-  const totalItems = items.length
-  const totalQuantity = items.reduce((sum, it) => sum + Number.parseFloat(it.quantity || "0"), 0)
+  const totalItems = items.length;
+  const totalQuantity = items.reduce((sum, it) => sum + Number.parseFloat(it.quantity || "0"), 0);
 
   if (receiversLoading || inventoriesLoading) {
     return (
@@ -149,7 +155,7 @@ export default function CreateTransferPage() {
         <Loader2 className="h-6 w-6 animate-spin mr-2" />
         <span className="text-gray-600">{t("loading")}</span>
       </div>
-    )
+    );
   }
 
   if (receivers.length === 0) {
@@ -157,7 +163,7 @@ export default function CreateTransferPage() {
       <div className="flex min-h-screen items-center justify-center p-6 bg-gray-50">
         <p className="text-red-500 text-sm bg-red-50 px-4 py-2 rounded-md border border-red-200">{t("noReceivers")}</p>
       </div>
-    )
+    );
   }
 
   if (availableInventories.length === 0) {
@@ -170,7 +176,7 @@ export default function CreateTransferPage() {
           <CardContent className="pt-4 text-center text-gray-600">{t("noInventoriesMessage")}</CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -178,7 +184,11 @@ export default function CreateTransferPage() {
       <div className="min-h-screen p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-800">{t("pageTitle")}</h1>
-          <Button onClick={handleSubmit} disabled={!receiver || items.length === 0 || isSubmitting} className="text-white">
+          <Button
+            onClick={handleSubmit}
+            disabled={!receiver || items.length === 0 || isSubmitting}
+            className="text-white"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -232,15 +242,15 @@ export default function CreateTransferPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {availableInventories.map((inv: Inventory) => {
-                      const availableQty = parseQuantity(inv.quantity)
-                      const materialName = inv.material.name
-                      const unit = inv.material?.unit || "g"
+                      const availableQty = parseQuantity(inv.quantity);
+                      const materialName = inv.material.name;
+                      const unit = inv.material?.unit || "g";
 
                       return (
                         <SelectItem key={inv.id} value={String(inv.id)}>
                           {materialName} ({availableQty.toFixed(3)} {unit})
                         </SelectItem>
-                      )
+                      );
                     })}
                   </SelectContent>
                 </Select>
@@ -251,9 +261,9 @@ export default function CreateTransferPage() {
                   type="number"
                   value={currentItem.quantity}
                   onChange={(e) => {
-                    const value = e.target.value
+                    const value = e.target.value;
                     if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                      setCurrentItem({ ...currentItem, quantity: value })
+                      setCurrentItem({ ...currentItem, quantity: value });
                     }
                   }}
                   placeholder={t("quantityPlaceholder")}
@@ -283,10 +293,10 @@ export default function CreateTransferPage() {
                 </thead>
                 <tbody>
                   {items.map((it, i) => {
-                    const inv = inventories.find((x) => String(x.id) === it.inventory)
-                    const availableQty = parseQuantity(inv?.quantity)
-                    const transferQty = Number.parseFloat(it.quantity)
-                    const remaining = availableQty - transferQty
+                    const inv = inventories.find((x) => String(x.id) === it.inventory);
+                    const availableQty = parseQuantity(inv?.quantity);
+                    const transferQty = Number.parseFloat(it.quantity);
+                    const remaining = availableQty - transferQty;
                     return (
                       <tr key={i} className="border-t border-gray-200 hover:bg-gray-50">
                         <td className="p-3">{inv?.material.name ?? "Noma'lum"}</td>
@@ -294,15 +304,22 @@ export default function CreateTransferPage() {
                         <td className="p-3">{inv?.material.unit ?? "-"}</td>
                         <td className="p-3">{availableQty.toFixed(3)}</td>
                         <td className="p-3">
-                          <span className={remaining >= 0 ? "text-green-600" : "text-red-600"}>{remaining.toFixed(3)}</span>
+                          <span className={remaining >= 0 ? "text-green-600" : "text-red-600"}>
+                            {remaining.toFixed(3)}
+                          </span>
                         </td>
                         <td className="p-3">
-                          <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(i)} className="text-red-500 hover:text-red-700">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveItem(i)}
+                            className="text-red-500 hover:text-red-700"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </td>
                       </tr>
-                    )
+                    );
                   })}
                   {items.length === 0 && (
                     <tr>
@@ -330,5 +347,5 @@ export default function CreateTransferPage() {
         )}
       </div>
     </TooltipProvider>
-  )
+  );
 }
